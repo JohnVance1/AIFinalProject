@@ -12,16 +12,26 @@ public class LevelGenerator : MonoBehaviour
     public string seed;
     public bool randomSeed;
 
+    [Header("Generation Method")]
+    [SerializeField] private bool randomFill;
+    [SerializeField] private bool perlinNoise;
+    [SerializeField] private bool fractalBrownianNoise;
+
+    private float increment;
+
     [Range(0, 100)]
     public int fillPercent;
 
-    private int[,] map;
-    private int[,] tempMap;
+    private float[,] map;
+    private float[,] tempMap;
     MeshGenerator meshGen;
 
+    [SerializeField]
+    private float squareSize;
 
     void Start()
     {
+        increment = 0.03f;
         meshGen = GetComponent<MeshGenerator>();
 
         GenerateMap();
@@ -29,8 +39,9 @@ public class LevelGenerator : MonoBehaviour
 
     private void Update()
     {
+        //GenerateMap();
         // On left mouse click generate a new map
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0))
         {
             GenerateMap();
 
@@ -42,64 +53,24 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private void GenerateMap()
     {
-        map = new int[width, height];
-        tempMap = new int[width, height];
+        map = new float[width, height];
+        tempMap = map;
 
         // Fill in the map
-        RandomFillMap();
+        FillInMap();
         tempMap = map;
+
 
         // Smooth out the map
         for (int i = 0; i < 5; i++)
         {
             SmoothMap();
             map = tempMap;
+
         }
 
         // Start generating a mesh
-        meshGen.GenerateMesh(map, 1);
-    }
-
-    /// <summary>
-    /// Populates the map based off of a seed
-    /// </summary>
-    private void RandomFillMap()
-    {
-        // Gets a random seed
-        if (randomSeed)
-        {
-            seed = UnityEngine.Random.Range(0, 1000).ToString();
-        }
-
-        System.Random rand = new System.Random(seed.GetHashCode());
-
-        // Actually populates the map
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                // If they are along the borders of the map then make them walls
-                if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
-                {
-                    map[x, y] = 1;
-                }
-                else
-                {
-                    if(rand.Next(0, 100) < fillPercent)
-                    {
-                        map[x, y] = 1;
-                    }
-                    else
-                    {
-                        map[x, y] = 0;
-
-                    }
-                }
-
-                
-            }
-        }
-
+        meshGen.GenerateMesh(map, squareSize);
     }
 
     /// <summary>
@@ -107,20 +78,19 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private void SmoothMap()
     {
-        for(int x = 0; x < width; x++)
+        for (int x = 0; x < width; x++)
         {
-            for(int y = 0; y < height; y++)
+            for (int y = 0; y < height; y++)
             {
-                // Gets the number of walls around the current square
-                int closeWalls = GetNearbyWalls(x, y);
+                int neighbourWallTiles = GetNearbyWalls(x, y);
 
-                if(closeWalls > 4)
+                if (neighbourWallTiles > 4)
                 {
-                    tempMap[x, y] = 1;
+                    map[x, y] = 1;
                 }
-                else if(closeWalls <= 4)
+                else if (neighbourWallTiles < 4)
                 {
-                    tempMap[x, y] = 0;
+                    map[x, y] = 0;
                 }
 
             }
@@ -147,7 +117,11 @@ public class LevelGenerator : MonoBehaviour
                     // If its not the current square
                     if (neighbourX != x || neighbourY != y)
                     {
-                        wallCount += map[neighbourX, neighbourY];
+                        if (tempMap[neighbourX, neighbourY] >= (fillPercent / 100f))
+                        {
+                            wallCount++;
+                        }
+                        
                     }
                 }
                 else
@@ -160,22 +134,117 @@ public class LevelGenerator : MonoBehaviour
         return wallCount;
     }
 
-
-    void OnDrawGizmos()
+    /// <summary>
+    /// Populates the map based off of a seed
+    /// </summary>
+    private void FillInMap()
     {
-        //if (map != null)
-        //{
-        //    for (int x = 0; x < width; x++)
-        //    {
-        //        for (int y = 0; y < height; y++)
-        //        {
-        //            Gizmos.color = (map[x, y] == 1) ? Color.black : Color.white;
-        //            Vector3 pos = new Vector3(-width / 2 + x + 0.5f, -height / 2 + y + 0.5f, 0);
-        //            Gizmos.DrawCube(pos, Vector3.one);
-        //        }
-        //    }
-        //}
+        // Gets a random seed
+        if (randomSeed)
+        {
+            seed = UnityEngine.Random.Range(0, 1000).ToString();
+        }
+
+        System.Random rand = new System.Random(seed.GetHashCode());
+
+        if(randomFill)
+        {
+            RandomFill(rand);
+        }
+        else if (perlinNoise)
+        {
+            PerlinNoise(rand);
+        }
+        else if (fractalBrownianNoise)
+        {
+            FractalBrownianNoise(rand);
+
+        }
+
     }
 
+    public void RandomFill(System.Random seed)
+    {
+        // Actually populates the map
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                // If they are along the borders of the map then make them walls
+                if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
+                {
+                    map[x, y] = 1;
+                }
+                else
+                {
+                    if (seed.Next(0, 100) < fillPercent)
+                    {
+                        map[x, y] = 1;
+                    }
+                    else
+                    {
+                        map[x, y] = 0;
+
+                    }
+                }
+
+
+            }
+        }
+    }
+
+    /// <summary>
+    /// Allows for the use of Perlin Noise for generation
+    /// </summary>
+    /// <param name="seed"></param>
+    public void PerlinNoise(System.Random seed)
+    {
+        float next = (float)seed.Next(0, 100) / 1000f;
+
+        increment = next;
+
+        float xCoord = 0;
+
+        for (int x = 0; x < width; x++)
+        {
+            float yCoord = 0;
+            xCoord += increment;
+            for (int y = 0; y < height; y++)
+            {
+                yCoord += increment;
+
+                float noise = Mathf.PerlinNoise(xCoord, yCoord);
+
+                // If they are along the borders of the map then make them walls
+                if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
+                {
+                    map[x, y] = 1;
+                }
+                else if (noise < ((float)fillPercent / 100f))
+                {
+                    map[x, y] = 1;
+                }
+                else
+                {
+                    map[x, y] = 0;
+
+                }
+                //else
+                //{
+                //    map[x, y] = noise;
+                //}
+                
+
+
+            }
+        }
+
+    }
+
+    public void FractalBrownianNoise(System.Random seed)
+    {
+
+
+    }
 
 }
