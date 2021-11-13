@@ -11,12 +11,6 @@ public class LevelGenerator : MonoBehaviour
 
     public string seed;
     public bool randomSeed;
-
-    [Header("Generation Method")]
-    [SerializeField] private bool randomFill;
-    [SerializeField] private bool perlinNoise;
-    [SerializeField] private bool fractalBrownianNoise;
-
     private float increment;
 
     [Range(0, 100)]
@@ -28,6 +22,13 @@ public class LevelGenerator : MonoBehaviour
 
     [SerializeField]
     private float squareSize;
+
+    [Header("Generation Method")]
+    [SerializeField] private bool randomFill;
+    [SerializeField] private bool perlinNoise;
+    [SerializeField] private bool fractalBrownianNoise;
+
+    
 
     void Start()
     {
@@ -163,6 +164,10 @@ public class LevelGenerator : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Randomly fills in the map
+    /// </summary>
+    /// <param name="seed"></param>
     public void RandomFill(System.Random seed)
     {
         // Actually populates the map
@@ -220,7 +225,7 @@ public class LevelGenerator : MonoBehaviour
                 {
                     map[x, y] = 1;
                 }
-                else if (noise < ((float)fillPercent / 100f))
+                else if (noise < (fillPercent / 100f))
                 {
                     map[x, y] = 1;
                 }
