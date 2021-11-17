@@ -4,12 +4,11 @@ using UnityEngine;
 
 public class MeshGenerator : MonoBehaviour
 {
+    Mesh mesh;
     public SquareGrid grid;
     private List<Vector3> vertices;
     private List<int> triangles;
-
     
-
     /// <summary>
     /// Takes in the map from the LevelGenerator and 
     /// creates a mesh of triangles based on the active points
@@ -28,22 +27,13 @@ public class MeshGenerator : MonoBehaviour
             {
                 for (int y = 0; y < grid.squares.GetLength(1); y++)
                 {
-                    //TriangulateSquare(grid.squares[x, y]);
+                    TriangulateSquare(grid.squares[x, y]);
                 }
             }
         }
-        else if(grid.roundedSquares != null)
-        {
-            for (int x = 0; x < grid.roundedSquares.GetLength(0); x++)
-            {
-                for (int y = 0; y < grid.roundedSquares.GetLength(1); y++)
-                {
-                    TriangulateSquare(grid.roundedSquares[x, y]);
-                }
-            }
-        }
+        
 
-        Mesh mesh = new Mesh();
+        mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
         mesh.vertices = vertices.ToArray();
@@ -51,12 +41,14 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
+   
+   
     /// <summary>
     /// Determines what the triangles are going to look like 
     /// based off of which Nodes are active
     /// </summary>
     /// <param name="square"></param>
-    void TriangulateSquare(RoundedSquare square)
+    void TriangulateSquare(Square square)
     {
         switch (square.configuration)
         {
@@ -181,10 +173,6 @@ public class MeshGenerator : MonoBehaviour
     public class SquareGrid
     {
         public Square[,] squares;
-        public RoundedSquare[,] roundedSquares;
-
-        [Header("Rounded")]
-        [SerializeField] private bool rounded = true;
 
         /// <summary>
         /// Populates the new grid with Nodes for each side and corner of every square
@@ -198,83 +186,45 @@ public class MeshGenerator : MonoBehaviour
             float mapWidth = nodeCountX * squareSize;
             float mapHeight = nodeCountY * squareSize;
 
-            float[] decimals = new float[4];
+            Node[,] nodes = new Node[nodeCountX, nodeCountY];
 
-            if (!rounded)
+            for (int x = 0; x < nodeCountX; x++)
             {
-                ControlNode[,] controlNodes = new ControlNode[nodeCountX, nodeCountY];
-
-                for (int x = 0; x < nodeCountX; x++)
+                for (int y = 0; y < nodeCountY; y++)
                 {
-                    for (int y = 0; y < nodeCountY; y++)
-                    {
-                        // Gets the middle point of each square
-                        Vector3 pos = new Vector3(-mapWidth / 2 + x * squareSize + squareSize / 2, 0, -mapHeight / 2 + y * squareSize + squareSize / 2);
-                        // Adds it to the new list of nodes
-                        controlNodes[x, y] = new ControlNode(pos, map[x, y] == 1, squareSize);
-                    }
-                }
+                    // Gets the middle point of each square
+                    Vector3 pos = new Vector3(-mapWidth / 2 + x * squareSize + squareSize / 2, 0, -mapHeight / 2 + y * squareSize + squareSize / 2);
 
-                // Creates the array of squares
-                squares = new Square[nodeCountX - 1, nodeCountY - 1];
-                for (int x = 0; x < nodeCountX - 1; x++)
-                {
-                    for (int y = 0; y < nodeCountY - 1; y++)
-                    {
-                        // Adds a new square for each square in the original map
-                        squares[x, y] = new Square(controlNodes[x, y + 1], controlNodes[x + 1, y + 1], controlNodes[x + 1, y], controlNodes[x, y]);
-                    }
+                    // Adds it to the new list of nodes
+                    nodes[x, y] = new Node(pos, map[x, y] == 1, squareSize);
                 }
-
             }
-            else
+
+            // Creates the array of squares
+            squares = new Square[nodeCountX - 1, nodeCountY - 1];
+            for (int x = 0; x < nodeCountX - 1; x++)
             {
-                RoundedControlNode[,] roundedControlNodes = new RoundedControlNode[nodeCountX, nodeCountY];
-
-                for (int x = 0; x < nodeCountX; x++)
+                for (int y = 0; y < nodeCountY - 1; y++)
                 {
-                    for (int y = 0; y < nodeCountY; y++)
-                    {
-                        // Gets the middle point of each square
-                        Vector3 pos = new Vector3(-mapWidth / 2 + x * squareSize + squareSize / 2, 0, -mapHeight / 2 + y * squareSize + squareSize / 2);
-
-                        if (x < map.GetLength(0) - 1 && y < map.GetLength(1) - 1)
-                        {
-                            decimals[0] = map[x, y + 1];
-                            decimals[1] = map[x + 1, y + 1];
-                            decimals[2] = map[x + 1, y];
-                            decimals[3] = map[x, y];
-                        }
-
-                        // Adds it to the new list of nodes
-                        roundedControlNodes[x, y] = new RoundedControlNode(pos, map[x, y] >= 0.5f, squareSize, decimals);
-                    }
-                }
-
-                // Creates the array of squares
-                roundedSquares = new RoundedSquare[nodeCountX - 1, nodeCountY - 1];
-                for (int x = 0; x < nodeCountX - 1; x++)
-                {
-                    for (int y = 0; y < nodeCountY - 1; y++)
-                    {
-                        // Adds a new square for each square in the original map
-                        roundedSquares[x, y] = new RoundedSquare(roundedControlNodes[x, y + 1], roundedControlNodes[x + 1, y + 1], roundedControlNodes[x + 1, y], roundedControlNodes[x, y]);
-                    }
+                    // Adds a new square for each square in the original map
+                    squares[x, y] = new Square(nodes[x, y + 1], nodes[x + 1, y + 1], nodes[x + 1, y], nodes[x, y]);
                 }
             }
 
         }
+            
     }
+
 
     /// <summary>
     /// Gets the single square, its four corners, and its four sides
     /// </summary>
     public class Square
     {
-        public ControlNode topLeft;
-        public ControlNode topRight;
-        public ControlNode bottomRight;
-        public ControlNode bottomLeft;
+        public Node topLeft;
+        public Node topRight;
+        public Node bottomRight;
+        public Node bottomLeft;
 
         public Node centerTop;
         public Node centerRight;
@@ -290,7 +240,7 @@ public class MeshGenerator : MonoBehaviour
         /// <param name="_topRight"></param>
         /// <param name="_bottomRight"></param>
         /// <param name="_bottomLeft"></param>
-        public Square(ControlNode _topLeft, ControlNode _topRight, ControlNode _bottomRight, ControlNode _bottomLeft)
+        public Square(Node _topLeft, Node _topRight, Node _bottomRight, Node _bottomLeft)
         {
             topLeft = _topLeft;
             topRight = _topRight;
@@ -323,63 +273,7 @@ public class MeshGenerator : MonoBehaviour
 
     }
 
-    /// <summary>
-    /// Gets the single square, its four corners, and its four sides
-    /// </summary>
-    public class RoundedSquare
-    {
-        public RoundedControlNode topLeft;
-        public RoundedControlNode topRight;
-        public RoundedControlNode bottomRight;
-        public RoundedControlNode bottomLeft;
-
-        public Node centerTop;
-        public Node centerRight;
-        public Node centerBotton;
-        public Node centerLeft;
-
-        public int configuration;
-
-        /// <summary>
-        /// Gets the single square, its four corners, and its four sides
-        /// </summary>
-        /// <param name="_topLeft"></param>
-        /// <param name="_topRight"></param>
-        /// <param name="_bottomRight"></param>
-        /// <param name="_bottomLeft"></param>
-        public RoundedSquare(RoundedControlNode _topLeft, RoundedControlNode _topRight, RoundedControlNode _bottomRight, RoundedControlNode _bottomLeft)
-        {
-            topLeft = _topLeft;
-            topRight = _topRight;
-            bottomRight = _bottomRight;
-            bottomLeft = _bottomLeft;
-
-            centerTop = topLeft.right;
-            centerRight = topRight.above;
-            centerBotton = bottomRight.right;
-            centerLeft = bottomLeft.left;
-
-            if (topLeft.active)
-            {
-                configuration += 8;
-            }
-            if (topRight.active)
-            {
-                configuration += 4;
-            }
-            if (bottomRight.active)
-            {
-                configuration += 2;
-            }
-            if (bottomLeft.active)
-            {
-                configuration += 1;
-            }
-
-        }
-
-    }
-
+    
     /// <summary>
     /// The basic point for each corner and side
     /// </summary>
@@ -387,6 +281,17 @@ public class MeshGenerator : MonoBehaviour
     {
         public Vector3 pos;
         public int index = -1;
+        public bool active;
+        public Node above;
+        public Node right;
+
+        public Node(Vector3 position, bool act, float squareSize)
+        {
+            active = act;
+            above = new Node(position + Vector3.forward * squareSize / 2);
+            right = new Node(position + Vector3.right * squareSize / 2);
+            pos = position;
+        }
 
         public Node(Vector3 position)
         {
@@ -399,71 +304,26 @@ public class MeshGenerator : MonoBehaviour
     /// Used for each of the square's corners 
     /// which then allows for us to get the middle of each of the square's sides
     /// </summary>
-    public class ControlNode : Node
-    {
-        public bool active;
-        public Node above;
-        public Node right;
+    //public class ControlNode : Node
+    //{
+    //    public bool active;
+    //    public Node above;
+    //    public Node right;
 
-        /// <summary>
-        /// Used for each of the square's corners 
-        /// which then allows for us to get the middle of each of the square's sides
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="act"></param>
-        /// <param name="squareSize"></param>
-        public ControlNode(Vector3 position, bool act, float squareSize) : base(position)
-        {
-            active = act;
-            above = new Node(position + Vector3.forward * squareSize / 2);
-            right = new Node(position + Vector3.right * squareSize / 2);
-        }
-    }
+    //    /// <summary>
+    //    /// Used for each of the square's corners 
+    //    /// which then allows for us to get the middle of each of the square's sides
+    //    /// </summary>
+    //    /// <param name="position"></param>
+    //    /// <param name="act"></param>
+    //    /// <param name="squareSize"></param>
+    //    public ControlNode(Vector3 position, bool act, float squareSize) : base(position)
+    //    {
+    //        active = act;
+    //        above = new Node(position + Vector3.forward * squareSize / 2);
+    //        right = new Node(position + Vector3.right * squareSize / 2);
+    //    }
+    //}
 
-    /// <summary>
-    /// Used for each of the square's corners 
-    /// which then allows for us to get the middle of each of the square's sides
-    /// </summary>
-    public class RoundedControlNode : Node
-    {
-        public bool active;
-        public Node above;
-        public Node right;
-        public Node below;
-        public Node left;
-
-        /// <summary>
-        /// Used for each of the square's corners 
-        /// which then allows for us to get the middle of each of the square's sides
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="act"></param>
-        /// <param name="squareSize"></param>
-        public RoundedControlNode(Vector3 position, bool act, float squareSize, float[] decimals) : base(position)
-        {
-            active = act;
-            above = new Node(MidPoints(position, Vector3.forward, Vector3.right, squareSize, decimals[0], decimals[1]));
-            right = new Node(MidPoints(position, Vector3.right, Vector3.back, squareSize, decimals[1], decimals[2]));
-            below = new Node(MidPoints(position, Vector3.back, Vector3.left, squareSize, decimals[2], decimals[3]));
-            left = new Node(MidPoints(position, Vector3.left, Vector3.forward, squareSize, decimals[3], decimals[0]));
-
-            //above = new Node((position) + Vector3.forward * squareSize / 2);
-            //right = new Node((position) + Vector3.right * squareSize / 2);
-            //below = new Node((position) + Vector3.back * squareSize / 2);
-            //left = new Node((position) + Vector3.left * squareSize / 2);
-        }
-
-        public Vector3 MidPoints(Vector3 pos, Vector3 dir, Vector3 perpendicularDir, float size, float val1, float val2)
-        {
-            float median = (val1 + val2) / 2;
-
-            Vector3 direction = dir * size / 2;
-
-            Vector3 newPos = pos + (perpendicularDir * (median - 0.5f));
-
-            return newPos + direction;
-
-        }
-
-    }
+    
 }

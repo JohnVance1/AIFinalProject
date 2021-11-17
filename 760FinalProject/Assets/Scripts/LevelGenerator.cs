@@ -4,6 +4,14 @@ using UnityEngine;
 using System;
 using Unity.Collections;
 
+
+public enum Generation
+{
+    RandomFill,
+    PerlinNoise = 1,
+    FractalBrownianNoise = 2
+}
+
 public class LevelGenerator : MonoBehaviour
 {
     public int width;
@@ -28,12 +36,22 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private bool perlinNoise;
     [SerializeField] private bool fractalBrownianNoise;
 
-    
+    private string[] toolbarSettings = { "Random", "Perlin Noise", "Fractal Brownian Noise" };
+    private int toolbarInt = 0;
+
+    public int octaves = 1;
+
+    private void OnGUI()
+    {
+        toolbarInt = GUILayout.Toolbar(toolbarInt, toolbarSettings);
+    }
 
     void Start()
     {
         increment = 0.03f;
         meshGen = GetComponent<MeshGenerator>();
+
+
 
         GenerateMap();
     }
@@ -148,19 +166,35 @@ public class LevelGenerator : MonoBehaviour
 
         System.Random rand = new System.Random(seed.GetHashCode());
 
-        if(randomFill)
+        switch(toolbarInt)
         {
-            RandomFill(rand);
-        }
-        else if (perlinNoise)
-        {
-            PerlinNoise(rand);
-        }
-        else if (fractalBrownianNoise)
-        {
-            FractalBrownianNoise(rand);
+            case 0:
+                RandomFill(rand);
+                break;
+
+            case 1: 
+                PerlinNoise(rand);
+                break;
+
+            case 2:
+                FractalBrownianNoise(rand);
+                break;
 
         }
+
+        //if (randomFill)
+        //{
+        //    RandomFill(rand);
+        //}
+        //else if (perlinNoise)
+        //{
+        //    PerlinNoise(rand);
+        //}
+        //else if (fractalBrownianNoise)
+        //{
+        //    FractalBrownianNoise(rand);
+
+        //}
 
     }
 
@@ -198,6 +232,27 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
+    public static float GetNoiseAt(float x, float z, float heightMultiplier, int octaves, float persistance, float lacunarity)
+    {
+        float PerlinValue = 0f;
+        float amplitude = 1f;
+        float frequency = 1f;
+
+        for (int i = 0; i < octaves; i++)
+        {
+            // Get the perlin value at that octave and add it to the sum
+            PerlinValue += Mathf.PerlinNoise(x * frequency, z * frequency) * amplitude;
+
+            // Decrease the amplitude and the frequency
+            amplitude *= persistance;
+            frequency *= lacunarity;
+        }
+
+        // Return the noise value
+        return PerlinValue * heightMultiplier;
+    }
+
+
     /// <summary>
     /// Allows for the use of Perlin Noise for generation
     /// </summary>
@@ -218,7 +273,9 @@ public class LevelGenerator : MonoBehaviour
             {
                 yCoord += increment;
 
-                float noise = Mathf.PerlinNoise(xCoord, yCoord);
+                float noise = GetNoiseAt(xCoord, yCoord, 1, 4, 0.3f, 0.5f);
+
+                //float noise = Mathf.PerlinNoise(xCoord, yCoord);
 
                 // If they are along the borders of the map then make them walls
                 if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
@@ -248,7 +305,14 @@ public class LevelGenerator : MonoBehaviour
 
     public void FractalBrownianNoise(System.Random seed)
     {
+        float time = 0.0f;
 
+        for(int i = 0; i < octaves; i++)
+        {
+            float f = Mathf.Pow(2.0f, (float)i);
+            //float a = pow(f, )
+
+        }
 
     }
 
