@@ -20,6 +20,7 @@ public class LevelGenerator : MonoBehaviour
     public string seed;
     public bool randomSeed;
     private float increment;
+    private int hardSeed;
 
     [Range(0, 100)]
     public int fillPercent;
@@ -50,7 +51,7 @@ public class LevelGenerator : MonoBehaviour
     {
         increment = 0.03f;
         meshGen = GetComponent<MeshGenerator>();
-
+        hardSeed = 1000;
 
 
         GenerateMap();
@@ -58,7 +59,7 @@ public class LevelGenerator : MonoBehaviour
 
     private void Update()
     {
-        //GenerateMap();
+        GenerateMap();
         // On left mouse click generate a new map
         if (Input.GetMouseButtonDown(0))
         {
@@ -78,7 +79,6 @@ public class LevelGenerator : MonoBehaviour
         // Fill in the map
         FillInMap();
         tempMap = map;
-
 
         // Smooth out the map
         for (int i = 0; i < 5; i++)
@@ -182,24 +182,11 @@ public class LevelGenerator : MonoBehaviour
 
         }
 
-        //if (randomFill)
-        //{
-        //    RandomFill(rand);
-        //}
-        //else if (perlinNoise)
-        //{
-        //    PerlinNoise(rand);
-        //}
-        //else if (fractalBrownianNoise)
-        //{
-        //    FractalBrownianNoise(rand);
-
-        //}
-
     }
 
     /// <summary>
     /// Randomly fills in the map
+    /// Also White Noise
     /// </summary>
     /// <param name="seed"></param>
     public void RandomFill(System.Random seed)
@@ -232,7 +219,7 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    public static float GetNoiseAt(float x, float z, float heightMultiplier, int octaves, float persistance, float lacunarity)
+    public float GetNoiseAt(float x, float z, float heightMultiplier, int octaves, float persistance, float lacunarity)
     {
         float PerlinValue = 0f;
         float amplitude = 1f;
@@ -263,6 +250,9 @@ public class LevelGenerator : MonoBehaviour
 
         increment = next;
 
+        hardSeed--;
+        increment = (float)hardSeed / 1000;
+        Debug.Log(increment);
         float xCoord = 0;
 
         for (int x = 0; x < width; x++)
@@ -273,10 +263,11 @@ public class LevelGenerator : MonoBehaviour
             {
                 yCoord += increment;
 
-                float noise = GetNoiseAt(xCoord, yCoord, 1, 4, 0.3f, 0.5f);
-
-                //float noise = Mathf.PerlinNoise(xCoord, yCoord);
-
+                //float noise = GetNoiseAt(xCoord, yCoord, 1, 1, 0.3f, 0.5f);
+                //float noise = Mathf.PerlinNoise(x / (float)width, y / (float)height) + increment;
+                //Debug.Log(increment);
+                float noise = Mathf.PerlinNoise(xCoord, yCoord);
+                //
                 // If they are along the borders of the map then make them walls
                 if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
                 {
@@ -305,13 +296,41 @@ public class LevelGenerator : MonoBehaviour
 
     public void FractalBrownianNoise(System.Random seed)
     {
-        float time = 0.0f;
+        System.Random rand = new System.Random(seed.GetHashCode());
 
-        for(int i = 0; i < octaves; i++)
+        float next = (float)rand.Next(10, 20) / 10;
+
+        hardSeed--;
+        next = (float)hardSeed / 1000;
+        Debug.Log(next);
+
+        float xCoord = 0;
+        for (int i = 0; i < width; i++)
         {
-            float f = Mathf.Pow(2.0f, (float)i);
-            //float a = pow(f, )
+            float yCoord = 0;
+            xCoord += next;
 
+            for (int j = 0; j < height; j++)
+            {
+                yCoord += next;
+                //heightArray[i, j] = Mathf.PerlinNoise(xCoord / (float)resolution, yCoord / (float)resolution);
+                float noise = GetNoiseAt(xCoord, yCoord, 0.5f, octaves, 0.9f, 0.7f);
+
+                if (i == 0 || i == width - 1 || j == 0 || j == height - 1)
+                {
+                    map[i, j] = 1;
+                }
+                else if (noise < (fillPercent / 100f))
+                {
+                    map[i, j] = 1;
+                }
+                else
+                {
+                    map[i, j] = 0;
+
+                }
+
+            }
         }
 
     }

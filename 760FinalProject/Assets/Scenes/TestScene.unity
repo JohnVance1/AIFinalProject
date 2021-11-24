@@ -156,6 +156,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   worldSize: {x: 0, y: 0, z: 0}
   resolution: 129
+  prefab: {fileID: 4317979140920886096, guid: 0f7c2dc94ad9b6a4e9bf074bf75615ab, type: 3}
 --- !u!154 &1170350556
 TerrainCollider:
   m_ObjectHideFlags: 0

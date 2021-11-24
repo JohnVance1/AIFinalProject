@@ -159,12 +159,12 @@ MonoBehaviour:
   height: 60
   seed: 
   randomSeed: 1
-  fillPercent: 48
+  fillPercent: 53
   squareSize: 1
   randomFill: 0
   perlinNoise: 1
   fractalBrownianNoise: 0
-  octaves: 1
+  octaves: 4
 --- !u!4 &206888492
 Transform:
   m_ObjectHideFlags: 0
