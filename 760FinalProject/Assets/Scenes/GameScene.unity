@@ -203,9 +203,9 @@ MonoBehaviour:
   spawner: {fileID: 157851376}
   width: 60
   height: 60
-  seed: 
-  randomSeed: 1
-  fillPercent: 53
+  seed: 304
+  randomSeed: 0
+  fillPercent: 48
   meshGen: {fileID: 0}
   squareSize: 1
   randomFill: 0
