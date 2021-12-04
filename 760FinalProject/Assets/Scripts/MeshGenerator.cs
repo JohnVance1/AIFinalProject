@@ -41,8 +41,14 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
-   
-   
+    public void GenerateGrid(float[,] map, float squareSize)
+    {
+        grid = new SquareGrid(map, squareSize);
+
+    }
+
+
+
     /// <summary>
     /// Determines what the triangles are going to look like 
     /// based off of which Nodes are active
@@ -167,138 +173,7 @@ public class MeshGenerator : MonoBehaviour
 
     }
 
-    /// <summary>
-    /// Populates the new grid with Nodes for each side and corner of every square
-    /// </summary>
-    public class SquareGrid
-    {
-        public Square[,] squares;
-
-        /// <summary>
-        /// Populates the new grid with Nodes for each side and corner of every square
-        /// </summary>
-        /// <param name="map">The map from the LevelGenerator class</param>
-        /// <param name="squareSize"></param>
-        public SquareGrid(float[,] map, float squareSize)
-        {
-            int nodeCountX = map.GetLength(0);
-            int nodeCountY = map.GetLength(1);
-            float mapWidth = nodeCountX * squareSize;
-            float mapHeight = nodeCountY * squareSize;
-
-            Node[,] nodes = new Node[nodeCountX, nodeCountY];
-
-            for (int x = 0; x < nodeCountX; x++)
-            {
-                for (int y = 0; y < nodeCountY; y++)
-                {
-                    // Gets the middle point of each square
-                    Vector3 pos = new Vector3(-mapWidth / 2 + x * squareSize + squareSize / 2, 0, -mapHeight / 2 + y * squareSize + squareSize / 2);
-
-                    // Adds it to the new list of nodes
-                    nodes[x, y] = new Node(pos, map[x, y] == 1, squareSize);
-                }
-            }
-
-            // Creates the array of squares
-            squares = new Square[nodeCountX - 1, nodeCountY - 1];
-            for (int x = 0; x < nodeCountX - 1; x++)
-            {
-                for (int y = 0; y < nodeCountY - 1; y++)
-                {
-                    // Adds a new square for each square in the original map
-                    squares[x, y] = new Square(nodes[x, y + 1], nodes[x + 1, y + 1], nodes[x + 1, y], nodes[x, y]);
-                }
-            }
-
-        }
-            
-    }
-
-
-    /// <summary>
-    /// Gets the single square, its four corners, and its four sides
-    /// </summary>
-    public class Square
-    {
-        public Node topLeft;
-        public Node topRight;
-        public Node bottomRight;
-        public Node bottomLeft;
-
-        public Node centerTop;
-        public Node centerRight;
-        public Node centerBotton;
-        public Node centerLeft;
-
-        public int configuration;
-
-        /// <summary>
-        /// Gets the single square, its four corners, and its four sides
-        /// </summary>
-        /// <param name="_topLeft"></param>
-        /// <param name="_topRight"></param>
-        /// <param name="_bottomRight"></param>
-        /// <param name="_bottomLeft"></param>
-        public Square(Node _topLeft, Node _topRight, Node _bottomRight, Node _bottomLeft)
-        {
-            topLeft = _topLeft;
-            topRight = _topRight;
-            bottomRight = _bottomRight;
-            bottomLeft = _bottomLeft;
-
-            centerTop = topLeft.right;
-            centerRight = bottomRight.above;
-            centerBotton = bottomLeft.right;
-            centerLeft = bottomLeft.above;
-
-            if(topLeft.active)
-            {
-                configuration += 8;
-            }
-            if(topRight.active)
-            {
-                configuration += 4;
-            }
-            if (bottomRight.active)
-            {
-                configuration += 2;
-            }
-            if(bottomLeft.active)
-            {
-                configuration += 1;
-            }
-
-        }
-
-    }
-
     
-    /// <summary>
-    /// The basic point for each corner and side
-    /// </summary>
-    public class Node
-    {
-        public Vector3 pos;
-        public int index = -1;
-        public bool active;
-        public Node above;
-        public Node right;
-
-        public Node(Vector3 position, bool act, float squareSize)
-        {
-            active = act;
-            above = new Node(position + Vector3.forward * squareSize / 2);
-            right = new Node(position + Vector3.right * squareSize / 2);
-            pos = position;
-        }
-
-        public Node(Vector3 position)
-        {
-            pos = position;
-        }
-
-    }
 
     /// <summary>
     /// Used for each of the square's corners 
@@ -326,4 +201,138 @@ public class MeshGenerator : MonoBehaviour
     //}
 
     
+}
+
+/// <summary>
+/// Populates the new grid with Nodes for each side and corner of every square
+/// </summary>
+public class SquareGrid
+{
+    public Square[,] squares;
+    public Node[,] nodes;
+
+    /// <summary>
+    /// Populates the new grid with Nodes for each side and corner of every square
+    /// </summary>
+    /// <param name="map">The map from the LevelGenerator class</param>
+    /// <param name="squareSize"></param>
+    public SquareGrid(float[,] map, float squareSize)
+    {
+        int nodeCountX = map.GetLength(0);
+        int nodeCountY = map.GetLength(1);
+        float mapWidth = nodeCountX * squareSize;
+        float mapHeight = nodeCountY * squareSize;
+
+        nodes = new Node[nodeCountX, nodeCountY];
+
+        for (int x = 0; x < nodeCountX; x++)
+        {
+            for (int y = 0; y < nodeCountY; y++)
+            {
+                // Gets the middle point of each square
+                Vector3 pos = new Vector3(-mapWidth / 2 + x * squareSize + squareSize / 2, 0, -mapHeight / 2 + y * squareSize + squareSize / 2);
+
+                // Adds it to the new list of nodes
+                nodes[x, y] = new Node(pos, map[x, y] == 1, squareSize);
+            }
+        }
+
+        // Creates the array of squares
+        squares = new Square[nodeCountX - 1, nodeCountY - 1];
+        for (int x = 0; x < nodeCountX - 1; x++)
+        {
+            for (int y = 0; y < nodeCountY - 1; y++)
+            {
+                // Adds a new square for each square in the original map
+                squares[x, y] = new Square(nodes[x, y + 1], nodes[x + 1, y + 1], nodes[x + 1, y], nodes[x, y]);
+            }
+        }
+
+    }
+
+}
+
+
+/// <summary>
+/// Gets the single square, its four corners, and its four sides
+/// </summary>
+public class Square
+{
+    public Node topLeft;
+    public Node topRight;
+    public Node bottomRight;
+    public Node bottomLeft;
+
+    public Node centerTop;
+    public Node centerRight;
+    public Node centerBotton;
+    public Node centerLeft;
+
+    public int configuration;
+
+    /// <summary>
+    /// Gets the single square, its four corners, and its four sides
+    /// </summary>
+    /// <param name="_topLeft"></param>
+    /// <param name="_topRight"></param>
+    /// <param name="_bottomRight"></param>
+    /// <param name="_bottomLeft"></param>
+    public Square(Node _topLeft, Node _topRight, Node _bottomRight, Node _bottomLeft)
+    {
+        topLeft = _topLeft;
+        topRight = _topRight;
+        bottomRight = _bottomRight;
+        bottomLeft = _bottomLeft;
+
+        centerTop = topLeft.right;
+        centerRight = bottomRight.above;
+        centerBotton = bottomLeft.right;
+        centerLeft = bottomLeft.above;
+
+        if (topLeft.active)
+        {
+            configuration += 8;
+        }
+        if (topRight.active)
+        {
+            configuration += 4;
+        }
+        if (bottomRight.active)
+        {
+            configuration += 2;
+        }
+        if (bottomLeft.active)
+        {
+            configuration += 1;
+        }
+
+    }
+
+}
+
+
+/// <summary>
+/// The basic point for each corner and side
+/// </summary>
+public class Node
+{
+    public Vector3 pos;
+    public int index = -1;
+    public bool active;
+    public Node above;
+    public Node right;
+
+    public Node(Vector3 position, bool act, float squareSize)
+    {
+        active = act;
+        above = new Node(position + Vector3.forward * squareSize / 2);
+        right = new Node(position + Vector3.right * squareSize / 2);
+        pos = position;
+    }
+
+    public Node(Vector3 position)
+    {
+        pos = position;
+    }
+
 }

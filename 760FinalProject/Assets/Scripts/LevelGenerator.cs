@@ -14,6 +14,9 @@ public enum Generation
 
 public class LevelGenerator : MonoBehaviour
 {
+    [SerializeField]
+    private NodeSpawner spawner;
+
     public int width;
     public int height;
 
@@ -25,9 +28,9 @@ public class LevelGenerator : MonoBehaviour
     [Range(0, 100)]
     public int fillPercent;
 
-    private float[,] map;
+    public float[,] map;
     private float[,] tempMap;
-    MeshGenerator meshGen;
+    public MeshGenerator meshGen;
 
     [SerializeField]
     private float squareSize;
@@ -47,7 +50,7 @@ public class LevelGenerator : MonoBehaviour
         toolbarInt = GUILayout.Toolbar(toolbarInt, toolbarSettings);
     }
 
-    void Start()
+    void OnEnable()
     {
         increment = 0.03f;
         meshGen = GetComponent<MeshGenerator>();
@@ -59,7 +62,7 @@ public class LevelGenerator : MonoBehaviour
 
     private void Update()
     {
-        GenerateMap();
+        //GenerateMap();
         // On left mouse click generate a new map
         if (Input.GetMouseButtonDown(0))
         {
@@ -87,6 +90,10 @@ public class LevelGenerator : MonoBehaviour
             map = tempMap;
 
         }
+
+        meshGen.GenerateGrid(map, squareSize);
+
+        spawner.ProcessMap();
 
         // Start generating a mesh
         meshGen.GenerateMesh(map, squareSize);
