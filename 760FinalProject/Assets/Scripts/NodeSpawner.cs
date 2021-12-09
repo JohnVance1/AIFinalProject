@@ -6,7 +6,10 @@ public class NodeSpawner : MonoBehaviour
 {
     private List<List<AINode>> nodes = new List<List<AINode>>();
     private List<GameObject> objects = new List<GameObject>();
-    
+    public List<AINode> largest;
+
+    [SerializeField]
+    private PathFinding path;
     [SerializeField]
     private LevelGenerator level;
     [SerializeField]
@@ -66,21 +69,79 @@ public class NodeSpawner : MonoBehaviour
 
     public void ShowNodes()
     {
-        Clear();
+        //Clear();
+        largest = new List<AINode>();
         foreach (List<AINode> element in nodes)
         {
-            List<AINode> region = element;
-            //Gizmos.color = new Color(Random.Range(0f, 255f), Random.Range(0f, 255f), Random.Range(0f, 255f));
-            Color newColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
-            foreach (AINode node in region)
+            if(element.Count > largest.Count)
             {
-                //Gizmos.DrawCube(node.pos, Vector3.one * 0.4f);
-                GameObject gO = Instantiate(cubePrefab, node.pos, Quaternion.identity);
-                gO.GetComponent<MeshRenderer>().material.color = newColor;
-                objects.Add(gO);
+                largest = element;
             }
+            
+            //DisplayAllRegions(element);
 
         }
+        //Clear();
+        Color c = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+
+        //foreach (AINode node in largest)
+        //{
+        //    //Gizmos.DrawCube(node.pos, Vector3.one * 0.4f);
+        //    GameObject gO = Instantiate(cubePrefab, node.pos, Quaternion.identity);
+        //    gO.GetComponent<MeshRenderer>().material.color = c;
+        //    objects.Add(gO);
+        //}
+        GetPoints(largest);
+    }
+
+    public void DisplayAllRegions(List<AINode> element)
+    {
+        Color newColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+        foreach (AINode node in element)
+        {
+            GameObject gO = Instantiate(cubePrefab, node.pos, Quaternion.identity);
+            gO.GetComponent<MeshRenderer>().material.color = newColor;
+            objects.Add(gO);
+        }
+    }
+
+    public void GetPoints(List<AINode> largest)
+    {
+        List<AINode> highestList = new List<AINode>();
+        List<AINode> lowestList = new List<AINode>();
+
+        AINode[,] largestMap = new AINode[level.width, level.height];
+
+        float highest = 0f;
+        float lowest = 1000f;
+        foreach (AINode node in largest)
+        {
+            largestMap[node.tileX, node.tileY] = node;
+
+            if (node.pos.z > highest)
+            {
+                highest = node.pos.z;
+            }
+            if (node.pos.z < lowest)
+            {
+                lowest = node.pos.z;
+            }
+        }
+
+        foreach (AINode node in largest)
+        {
+            if (node.pos.z == highest)
+            {
+                highestList.Add(node);
+            }
+            if (node.pos.z == lowest)
+            {
+                lowestList.Add(node);
+            }
+        }
+
+        path.AStar(highestList[0], lowestList[0], largestMap);
+
     }
 
     public void Clear()
@@ -151,6 +212,7 @@ public class NodeSpawner : MonoBehaviour
                     foreach (AINode tile in newRegion)
                     {
                         mapFlags[tile.tileX, tile.tileY] = 1;
+                 
                     }
                 }
             }
@@ -192,6 +254,8 @@ public class NodeSpawner : MonoBehaviour
                 }
             }
         }
+
+
 
         return tiles;
     }

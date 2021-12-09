@@ -47,6 +47,44 @@ public class MeshGenerator : MonoBehaviour
 
     }
 
+    void OnDrawGizmos()
+    {
+        //if (grid != null)
+        //{
+        //    for (int x = 0; x < grid.squares.GetLength(0); x++)
+        //    {
+        //        for (int y = 0; y < grid.squares.GetLength(1); y++)
+        //        {
+        //            Gizmos.color = (grid.squares[x, y].configuration == 3 ||
+        //               grid.squares[x, y].configuration == 5 ||
+        //               grid.squares[x, y].configuration == 7 ||
+        //               grid.squares[x, y].configuration == 10 ||
+        //               grid.squares[x, y].configuration == 11 ||
+        //               grid.squares[x, y].configuration == 15) ? Color.black : Color.red;
+        //            //Gizmos.color = (grid.squares[x, y].topLeft.active) ? Color.black : Color.white;
+        //            Gizmos.DrawCube(grid.squares[x, y].topLeft.pos, Vector3.one * .4f);
+
+        //            //Gizmos.color = (grid.squares[x, y].topRight.active) ? Color.black : Color.white;
+        //            Gizmos.DrawCube(grid.squares[x, y].topRight.pos, Vector3.one * .4f);
+
+        //            //Gizmos.color = (grid.squares[x, y].bottomRight.active) ? Color.black : Color.white;
+        //            Gizmos.DrawCube(grid.squares[x, y].bottomRight.pos, Vector3.one * .4f);
+
+        //            //Gizmos.color = (grid.squares[x, y].bottomLeft.active) ? Color.black : Color.white;
+        //            Gizmos.DrawCube(grid.squares[x, y].bottomLeft.pos, Vector3.one * .4f);
+
+
+        //            Gizmos.color = Color.grey;
+        //            Gizmos.DrawCube(grid.squares[x, y].centerTop.pos, Vector3.one * .15f);
+        //            Gizmos.DrawCube(grid.squares[x, y].centerRight.pos, Vector3.one * .15f);
+        //            Gizmos.DrawCube(grid.squares[x, y].centerBotton.pos, Vector3.one * .15f);
+        //            Gizmos.DrawCube(grid.squares[x, y].centerLeft.pos, Vector3.one * .15f);
+        //            y++;
+        //        }
+        //        x++;
+        //    }
+        //}
+    }
 
 
     /// <summary>
