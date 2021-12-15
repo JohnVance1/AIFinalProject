@@ -47,46 +47,6 @@ public class MeshGenerator : MonoBehaviour
 
     }
 
-    void OnDrawGizmos()
-    {
-        //if (grid != null)
-        //{
-        //    for (int x = 0; x < grid.squares.GetLength(0); x++)
-        //    {
-        //        for (int y = 0; y < grid.squares.GetLength(1); y++)
-        //        {
-        //            Gizmos.color = (grid.squares[x, y].configuration == 3 ||
-        //               grid.squares[x, y].configuration == 5 ||
-        //               grid.squares[x, y].configuration == 7 ||
-        //               grid.squares[x, y].configuration == 10 ||
-        //               grid.squares[x, y].configuration == 11 ||
-        //               grid.squares[x, y].configuration == 15) ? Color.black : Color.red;
-        //            //Gizmos.color = (grid.squares[x, y].topLeft.active) ? Color.black : Color.white;
-        //            Gizmos.DrawCube(grid.squares[x, y].topLeft.pos, Vector3.one * .4f);
-
-        //            //Gizmos.color = (grid.squares[x, y].topRight.active) ? Color.black : Color.white;
-        //            Gizmos.DrawCube(grid.squares[x, y].topRight.pos, Vector3.one * .4f);
-
-        //            //Gizmos.color = (grid.squares[x, y].bottomRight.active) ? Color.black : Color.white;
-        //            Gizmos.DrawCube(grid.squares[x, y].bottomRight.pos, Vector3.one * .4f);
-
-        //            //Gizmos.color = (grid.squares[x, y].bottomLeft.active) ? Color.black : Color.white;
-        //            Gizmos.DrawCube(grid.squares[x, y].bottomLeft.pos, Vector3.one * .4f);
-
-
-        //            Gizmos.color = Color.grey;
-        //            Gizmos.DrawCube(grid.squares[x, y].centerTop.pos, Vector3.one * .15f);
-        //            Gizmos.DrawCube(grid.squares[x, y].centerRight.pos, Vector3.one * .15f);
-        //            Gizmos.DrawCube(grid.squares[x, y].centerBotton.pos, Vector3.one * .15f);
-        //            Gizmos.DrawCube(grid.squares[x, y].centerLeft.pos, Vector3.one * .15f);
-        //            y++;
-        //        }
-        //        x++;
-        //    }
-        //}
-    }
-
-
     /// <summary>
     /// Determines what the triangles are going to look like 
     /// based off of which Nodes are active
@@ -210,34 +170,6 @@ public class MeshGenerator : MonoBehaviour
         triangles.Add(c.index);
 
     }
-
-    
-
-    /// <summary>
-    /// Used for each of the square's corners 
-    /// which then allows for us to get the middle of each of the square's sides
-    /// </summary>
-    //public class ControlNode : Node
-    //{
-    //    public bool active;
-    //    public Node above;
-    //    public Node right;
-
-    //    /// <summary>
-    //    /// Used for each of the square's corners 
-    //    /// which then allows for us to get the middle of each of the square's sides
-    //    /// </summary>
-    //    /// <param name="position"></param>
-    //    /// <param name="act"></param>
-    //    /// <param name="squareSize"></param>
-    //    public ControlNode(Vector3 position, bool act, float squareSize) : base(position)
-    //    {
-    //        active = act;
-    //        above = new Node(position + Vector3.forward * squareSize / 2);
-    //        right = new Node(position + Vector3.right * squareSize / 2);
-    //    }
-    //}
-
     
 }
 
@@ -347,7 +279,6 @@ public class Square
     }
 
 }
-
 
 /// <summary>
 /// The basic point for each corner and side

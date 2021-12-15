@@ -4,11 +4,18 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 
-
+/// <summary>
+/// Gets the path between the highest and lowest nodes
+/// </summary>
 public class PathFinding : SerializedMonoBehaviour
 {
     private AINode highNode;
     private AINode lowNode;
+
+    private List<GameObject> gOPath = new List<GameObject>();
+
+    [SerializeField]
+    private GameObject pathPrefab;
 
     private List<AINode> closed = new List<AINode>();
     private List<AINode> open = new List<AINode>();
@@ -41,6 +48,9 @@ public class PathFinding : SerializedMonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Clears all of the lists
+    /// </summary>
     public void Clear()
     {
         path.Clear();
@@ -48,6 +58,12 @@ public class PathFinding : SerializedMonoBehaviour
         closed.Clear();
     }
 
+    /// <summary>
+    /// The actual algorithm for A*
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="goal"></param>
+    /// <param name="map"></param>
     public void AStar(AINode start, AINode goal, AINode[,] map)
     {
         path.Clear();
@@ -120,8 +136,19 @@ public class PathFinding : SerializedMonoBehaviour
 
     }
 
+    /// <summary>
+    /// Constructs the path for the A* algorithm
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="goal"></param>
     public void ConstructPath(AINode start, AINode goal)
     {
+        foreach(GameObject gO in gOPath)
+        {
+            Destroy(gO);
+        }
+        gOPath.Clear();
+
         AINode current = goal;
 
         while(current != start)
@@ -132,21 +159,38 @@ public class PathFinding : SerializedMonoBehaviour
         path.Add(start);
 
         path.Reverse();
+
+        foreach(AINode node in path)
+        {
+            gOPath.Add(Instantiate(pathPrefab, node.pos, Quaternion.identity));
+        }
+
     }
 
+    /// <summary>
+    /// Gets the distance between two nodes
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
     public int GetDistance(AINode a, AINode b)
     {
-        int X = Mathf.Abs(a.tileX - b.tileX);
-        int Y = Mathf.Abs(a.tileY - b.tileY);
+        int x = Mathf.Abs(a.tileX - b.tileX);
+        int y = Mathf.Abs(a.tileY - b.tileY);
 
-        if(X > Y)
+        if(x > y)
         {
-            return 14 * Y + 10 * (X - Y);
+            return 14 * y + 10 * (x - y);
         }
-        return 14 * X + 10 * (Y - X);
+        return 14 * x + 10 * (y - x);
 
     }
 
+    /// <summary>
+    /// Gets all of the neighbors around a certain point
+    /// </summary>
+    /// <param name="current"></param>
+    /// <returns></returns>
     public List<AINode> Neighbors(AINode current)
     {
         AINode next;

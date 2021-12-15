@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Spawns the nodes
+/// </summary>
 public class NodeSpawner : MonoBehaviour
 {
     private List<List<AINode>> nodes = new List<List<AINode>>();
@@ -15,58 +18,10 @@ public class NodeSpawner : MonoBehaviour
     [SerializeField]
     private GameObject cubePrefab;
 
-    private void Start()
-    {
-        //AddNodes();
-
-    }
-
-    private void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            //AddNodes();
-
-        }
-    }
-
-    private void OnDrawGizmos()
-    {
-        
-
-
-
-    }
-
-    //public void AddNodes()
-    //{
-    //    nodes.Clear();
-    //    foreach (Square element in level.meshGen.grid.squares)
-    //    {
-    //        if (!element.topLeft.active)
-    //        {
-    //            nodes.Add(new AINode(element.topLeft.pos));
-    //        }
-    //        if (!element.topRight.active)
-    //        {
-    //            nodes.Add(new AINode(element.topRight.pos));
-
-    //        }
-    //        if (!element.bottomLeft.active)
-    //        {
-    //            nodes.Add(new AINode(element.bottomLeft.pos));
-
-    //        }
-    //        if (!element.bottomRight.active)
-    //        {
-    //            nodes.Add(new AINode(element.bottomRight.pos));
-
-    //        }
-
-    //    }
-
-    //}
-
+    
+    /// <summary>
+    /// Gets the largest open area
+    /// </summary>
     public void ShowNodes()
     {
         //Clear();
@@ -84,27 +39,13 @@ public class NodeSpawner : MonoBehaviour
         //Clear();
         Color c = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
 
-        //foreach (AINode node in largest)
-        //{
-        //    //Gizmos.DrawCube(node.pos, Vector3.one * 0.4f);
-        //    GameObject gO = Instantiate(cubePrefab, node.pos, Quaternion.identity);
-        //    gO.GetComponent<MeshRenderer>().material.color = c;
-        //    objects.Add(gO);
-        //}
         GetPoints(largest);
     }
 
-    public void DisplayAllRegions(List<AINode> element)
-    {
-        Color newColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
-        foreach (AINode node in element)
-        {
-            GameObject gO = Instantiate(cubePrefab, node.pos, Quaternion.identity);
-            gO.GetComponent<MeshRenderer>().material.color = newColor;
-            objects.Add(gO);
-        }
-    }
-
+    /// <summary>
+    /// Gets the highest and lowest points in the largest area
+    /// </summary>
+    /// <param name="largest"></param>
     public void GetPoints(List<AINode> largest)
     {
         List<AINode> highestList = new List<AINode>();
@@ -155,20 +96,9 @@ public class NodeSpawner : MonoBehaviour
         }
     }
 
-
-    public void Clear()
-    {
-        if(objects.Count <= 0)
-        {
-            return;
-        }
-        foreach(GameObject obj in objects)
-        {
-            Destroy(obj);
-        }
-        objects.Clear();
-    }
-
+    /// <summary>
+    /// Processes the entire map and gets the areas
+    /// </summary>
     public void ProcessMap()
     {
         List<List<AINode>> wallRegions = GetRegions(1);
@@ -204,6 +134,11 @@ public class NodeSpawner : MonoBehaviour
         ShowNodes();
     }
 
+    /// <summary>
+    /// Gets a region of open area or the walls
+    /// </summary>
+    /// <param name="tileType"></param>
+    /// <returns></returns>
     List<List<AINode>> GetRegions(int tileType)
     {
         List<List<AINode>> regions = new List<List<AINode>>();
@@ -233,6 +168,12 @@ public class NodeSpawner : MonoBehaviour
         return regions;
     }
 
+    /// <summary>
+    /// Gets the individual regions
+    /// </summary>
+    /// <param name="startX"></param>
+    /// <param name="startY"></param>
+    /// <returns></returns>
     List<AINode> GetRegionTiles(int startX, int startY)
     {
         int width = level.width;
@@ -272,6 +213,12 @@ public class NodeSpawner : MonoBehaviour
         return tiles;
     }
 
+    /// <summary>
+    /// Checks to see if it is in the map
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     bool IsInMapRange(int x, int y)
     {
         return x >= 0 && x < level.width && y >= 0 && y < level.height;

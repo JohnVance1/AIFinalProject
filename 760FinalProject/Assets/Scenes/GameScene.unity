@@ -514,6 +514,7 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+  pathPrefab: {fileID: 4317979140920886096, guid: 0f7c2dc94ad9b6a4e9bf074bf75615ab, type: 3}
 --- !u!4 &2125390236
 Transform:
   m_ObjectHideFlags: 0
