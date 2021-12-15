@@ -112,8 +112,11 @@ public class NodeSpawner : MonoBehaviour
 
         AINode[,] largestMap = new AINode[level.width, level.height];
 
-        float highest = 0f;
+        float highest = -1000f;
         float lowest = 1000f;
+        highestList.Clear();
+        lowestList.Clear();
+
         foreach (AINode node in largest)
         {
             largestMap[node.tileX, node.tileY] = node;
@@ -140,9 +143,18 @@ public class NodeSpawner : MonoBehaviour
             }
         }
 
-        path.AStar(highestList[0], lowestList[0], largestMap);
+        if (highestList.Count != 0 && lowestList.Count != 0)
+        {
+            path.AStar(highestList[0], lowestList[0], largestMap);
 
+        }
+        else
+        {
+            path.Clear();
+
+        }
     }
+
 
     public void Clear()
     {

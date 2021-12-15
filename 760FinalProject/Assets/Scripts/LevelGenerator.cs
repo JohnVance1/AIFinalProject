@@ -47,7 +47,74 @@ public class LevelGenerator : MonoBehaviour
 
     private void OnGUI()
     {
+        // Genneration Type
         toolbarInt = GUILayout.Toolbar(toolbarInt, toolbarSettings);
+
+        // Fill Percent
+        GUI.Label(new Rect(20f, 30f, 100f, 20f), "Fill Percent");
+        GUI.Label(new Rect(0f, 45f, 20f, 20f), "0%");
+        GUI.Label(new Rect(120f, 45f, 40f, 20f), "100%");
+        fillPercent = (int)GUI.HorizontalSlider(new Rect(20f, 50f, 100f, 10f), fillPercent, 0, 100);
+
+        // Width
+        GUI.Label(new Rect(20f, 60f, 100f, 20f), "Width");
+        GUI.Label(new Rect(0f, 75f, 20f, 20f), "8");
+        GUI.Label(new Rect(120f, 75f, 40f, 20f), "100");
+        width = (int)GUI.HorizontalSlider(new Rect(20f, 80f, 100f, 10f), width, 8, 100);
+
+        // Height
+        GUI.Label(new Rect(20f, 90f, 100f, 20f), "Height");
+        GUI.Label(new Rect(0f, 105f, 20f, 20f), "8");
+        GUI.Label(new Rect(120f, 105f, 40f, 20f), "100");
+        height = (int)GUI.HorizontalSlider(new Rect(20f, 110f, 100f, 10f), height, 8, 100);
+
+        // Random Seed
+        randomSeed = GUI.Toggle(new Rect(20f, 140f, 100f, 20f), randomSeed, "Random Seed");
+
+        // Seed
+        GUI.Label(new Rect(20f, 160f, 100f, 20f), "Seed");
+        seed = GUI.TextField(new Rect(20f, 180f, 50f, 20f), seed);
+
+        if(toolbarInt == 2)
+        {
+            GUI.Label(new Rect(20f, 200f, 100f, 20f), "Octaves");
+            GUI.Label(new Rect(0f, 220f, 20f, 20f), "1");
+            GUI.Label(new Rect(120f, 220f, 40f, 20f), "10");
+            octaves = (int)GUI.HorizontalSlider(new Rect(20f, 220f, 100f, 10f), octaves, 1, 10);
+
+        }
+
+        #region Switch
+        //switch (toolbarInt)
+        //{
+        //    case 0:
+
+        //        GUI.Label(new Rect(20f, 20f, 100f, 20f), "Fill Percent");
+        //        GUI.Label(new Rect(0f, 35f, 20f, 20f), "30%");
+        //        GUI.Label(new Rect(110f, 35f, 40f, 20f), "70%");
+
+        //        fillPercent = (int)GUI.HorizontalSlider(new Rect(20f, 40f, 100f, 10f), fillPercent, 30, 70);
+        //        break;
+
+        //    case 1:
+        //        GUI.Label(new Rect(20f, 20f, 100f, 20f), "Fill Percent");
+        //        GUI.Label(new Rect(0f, 35f, 20f, 20f), "15%");
+        //        GUI.Label(new Rect(110f, 35f, 40f, 20f), "55%");
+
+        //        fillPercent = (int)GUI.HorizontalSlider(new Rect(20f, 40f, 100f, 10f), fillPercent, 15, 55);
+        //        break;
+
+        //    case 2:
+        //        GUI.Label(new Rect(20f, 20f, 100f, 20f), "Fill Percent");
+        //        GUI.Label(new Rect(0f, 35f, 20f, 20f), "50%");
+        //        GUI.Label(new Rect(110f, 35f, 40f, 20f), "90%");
+
+        //        fillPercent = (int)GUI.HorizontalSlider(new Rect(20f, 40f, 100f, 10f), fillPercent, 50, 90);
+        //        break;
+
+        //}
+        #endregion
+
     }
 
     void OnEnable()
@@ -55,7 +122,6 @@ public class LevelGenerator : MonoBehaviour
         increment = 0.03f;
         meshGen = GetComponent<MeshGenerator>();
         hardSeed = 1000;
-
 
         GenerateMap();
     }

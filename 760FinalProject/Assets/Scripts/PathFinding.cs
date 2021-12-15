@@ -41,6 +41,13 @@ public class PathFinding : SerializedMonoBehaviour
         }
     }
 
+    public void Clear()
+    {
+        path.Clear();
+        open.Clear();
+        closed.Clear();
+    }
+
     public void AStar(AINode start, AINode goal, AINode[,] map)
     {
         path.Clear();

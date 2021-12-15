@@ -204,7 +204,7 @@ MonoBehaviour:
   spawner: {fileID: 157851376}
   width: 60
   height: 60
-  seed: 304
+  seed: 168
   randomSeed: 1
   fillPercent: 48
   meshGen: {fileID: 0}
@@ -493,6 +493,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b058536820e38554a9ce18997d35391d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: path
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[AINode, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
 --- !u!4 &2125390236
 Transform:
   m_ObjectHideFlags: 0
