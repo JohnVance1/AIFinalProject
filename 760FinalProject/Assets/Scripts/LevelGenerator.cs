@@ -4,6 +4,12 @@ using UnityEngine;
 using System;
 using Unity.Collections;
 
+public struct MapNodes
+{
+    public int active;
+    public float value;
+
+}
 
 public enum Generation
 {
@@ -28,12 +34,14 @@ public class LevelGenerator : MonoBehaviour
     [Range(0, 100)]
     public int fillPercent;
 
-    public float[,] map;
-    private float[,] tempMap;
+    public MapNodes[,] map;
+    private MapNodes[,] tempMap;
     public MeshGenerator meshGen;
 
     [SerializeField]
     private float squareSize;
+    [SerializeField] [Range(1, 10)]
+    private int resolution;
 
     [Header("Generation Method")]
     [SerializeField] private bool randomFill;
@@ -60,13 +68,13 @@ public class LevelGenerator : MonoBehaviour
         GUI.Label(new Rect(20f, 60f, 100f, 20f), "Width");
         GUI.Label(new Rect(0f, 75f, 20f, 20f), "8");
         GUI.Label(new Rect(120f, 75f, 40f, 20f), "100");
-        width = (int)GUI.HorizontalSlider(new Rect(20f, 80f, 100f, 10f), width, 8, 100);
+        width = (int)GUI.HorizontalSlider(new Rect(20f, 80f, 100f, 10f), width, 8, 100 * resolution);
 
         // Height
         GUI.Label(new Rect(20f, 90f, 100f, 20f), "Height");
         GUI.Label(new Rect(0f, 105f, 20f, 20f), "8");
         GUI.Label(new Rect(120f, 105f, 40f, 20f), "100");
-        height = (int)GUI.HorizontalSlider(new Rect(20f, 110f, 100f, 10f), height, 8, 100);
+        height = (int)GUI.HorizontalSlider(new Rect(20f, 110f, 100f, 10f), height, 8, 100 * resolution);
 
         // Random Seed
         randomSeed = GUI.Toggle(new Rect(20f, 140f, 100f, 20f), randomSeed, "Random Seed");
@@ -142,7 +150,9 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private void GenerateMap()
     {
-        map = new float[width, height];
+        //width *= resolution;
+        //height *= resolution;
+        map = new MapNodes[width * resolution, height * resolution];
         tempMap = map;
 
         // Fill in the map
@@ -157,12 +167,12 @@ public class LevelGenerator : MonoBehaviour
 
         }
 
-        meshGen.GenerateGrid(map, squareSize);
+        meshGen.GenerateGrid(map, squareSize, fillPercent / 100f);
 
         spawner.ProcessMap();
 
         // Start generating a mesh
-        meshGen.GenerateMesh(map, squareSize);
+        meshGen.GenerateMesh(map, squareSize, fillPercent / 100f);
     }
 
     /// <summary>
@@ -170,19 +180,19 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private void SmoothMap()
     {
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < width * resolution; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < height * resolution; y++)
             {
                 int neighbourWallTiles = GetNearbyWalls(x, y);
 
                 if (neighbourWallTiles > 4)
                 {
-                    map[x, y] = 1;
+                    map[x, y].active = 1;
                 }
                 else if (neighbourWallTiles < 4)
                 {
-                    map[x, y] = 0;
+                    map[x, y].active = 0;
                 }
 
             }
@@ -204,12 +214,12 @@ public class LevelGenerator : MonoBehaviour
         {
             for (int neighbourY = y - 1; neighbourY <= y + 1; neighbourY++)
             {
-                if (neighbourX >= 0 && neighbourX < width && neighbourY >= 0 && neighbourY < height)
+                if (neighbourX >= 0 && neighbourX < width * resolution && neighbourY >= 0 && neighbourY < height * resolution)
                 {
                     // If its not the current square
                     if (neighbourX != x || neighbourY != y)
                     {
-                        if (tempMap[neighbourX, neighbourY] >= (fillPercent / 100f))
+                        if (tempMap[neighbourX, neighbourY].active >= (fillPercent / 100f))
                         {
                             wallCount++;
                         }
@@ -265,24 +275,28 @@ public class LevelGenerator : MonoBehaviour
     public void RandomFill(System.Random seed)
     {
         // Actually populates the map
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < width * resolution; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < height * resolution; y++)
             {
                 // If they are along the borders of the map then make them walls
-                if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
+                if (x == 0 || x == width * resolution - 1 || y == 0 || y == height * resolution - 1)
                 {
-                    map[x, y] = 1;
+                    map[x, y].active = 1;
+                    map[x, y].value = 1;
                 }
                 else
                 {
-                    if (seed.Next(0, 100) < fillPercent)
+                    float randPercent = seed.Next(0, 100);
+                    map[x, y].value = randPercent / 100f;
+
+                    if (randPercent < fillPercent)
                     {
-                        map[x, y] = 1;
+                        map[x, y].active = 1;
                     }
                     else
                     {
-                        map[x, y] = 0;
+                        map[x, y].active = 0;
 
                     }
                 }
@@ -312,7 +326,6 @@ public class LevelGenerator : MonoBehaviour
         return PerlinValue * heightMultiplier;
     }
 
-
     /// <summary>
     /// Allows for the use of Perlin Noise for generation
     /// </summary>
@@ -328,11 +341,11 @@ public class LevelGenerator : MonoBehaviour
         Debug.Log(increment);
         float xCoord = 0;
 
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < width * resolution; x++)
         {
             float yCoord = 0;
             xCoord += increment;
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < height * resolution; y++)
             {
                 yCoord += increment;
 
@@ -340,19 +353,20 @@ public class LevelGenerator : MonoBehaviour
                 //float noise = Mathf.PerlinNoise(x / (float)width, y / (float)height) + increment;
                 //Debug.Log(increment);
                 float noise = Mathf.PerlinNoise(xCoord, yCoord);
-                //
+                map[x, y].value = noise;
+
                 // If they are along the borders of the map then make them walls
-                if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
+                if (x == 0 || x == width * resolution - 1 || y == 0 || y == height * resolution - 1)
                 {
-                    map[x, y] = 1;
+                    map[x, y].active = 1;
                 }
                 else if (noise < (fillPercent / 100f))
                 {
-                    map[x, y] = 1;
+                    map[x, y].active = 1;
                 }
                 else
                 {
-                    map[x, y] = 0;
+                    map[x, y].active = 0;
 
                 }
                 //else
@@ -378,28 +392,29 @@ public class LevelGenerator : MonoBehaviour
         Debug.Log(next);
 
         float xCoord = 0;
-        for (int i = 0; i < width; i++)
+        for (int i = 0; i < width * resolution; i++)
         {
             float yCoord = 0;
             xCoord += next;
 
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < height * resolution; j++)
             {
                 yCoord += next;
                 //heightArray[i, j] = Mathf.PerlinNoise(xCoord / (float)resolution, yCoord / (float)resolution);
                 float noise = GetNoiseAt(xCoord, yCoord, 0.5f, octaves, 0.9f, 0.7f);
+                map[i, j].value = noise;
 
-                if (i == 0 || i == width - 1 || j == 0 || j == height - 1)
+                if (i == 0 || i == width * resolution - 1 || j == 0 || j == height * resolution - 1)
                 {
-                    map[i, j] = 1;
+                    map[i, j].active = 1;
                 }
                 else if (noise < (fillPercent / 100f))
                 {
-                    map[i, j] = 1;
+                    map[i, j].active = 1;
                 }
                 else
                 {
-                    map[i, j] = 0;
+                    map[i, j].active = 0;
 
                 }
 

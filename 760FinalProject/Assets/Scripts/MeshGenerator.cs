@@ -8,6 +8,7 @@ public class MeshGenerator : MonoBehaviour
     public SquareGrid grid;
     private List<Vector3> vertices;
     private List<int> triangles;
+    public float fillPercent;
     
     /// <summary>
     /// Takes in the map from the LevelGenerator and 
@@ -15,10 +16,12 @@ public class MeshGenerator : MonoBehaviour
     /// </summary>
     /// <param name="map"></param>
     /// <param name="squareSize"></param>
-    public void GenerateMesh(float[,] map, float squareSize)
+    public void GenerateMesh(MapNodes[,] map, float squareSize, float fillPercent)
     {
-        grid = new SquareGrid(map, squareSize);
+        this.fillPercent = fillPercent;
+        grid = new SquareGrid(map, squareSize, fillPercent);
 
+        
         vertices = new List<Vector3>();
         triangles = new List<int>();
         if (grid.squares != null)
@@ -27,7 +30,8 @@ public class MeshGenerator : MonoBehaviour
             {
                 for (int y = 0; y < grid.squares.GetLength(1); y++)
                 {
-                    TriangulateSquare(grid.squares[x, y]);
+                    InterpolationTriangulateSquare(grid.squares[x, y]);
+                    //TriangulateSquare(grid.squares[x, y]);
                 }
             }
         }
@@ -41,9 +45,10 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
-    public void GenerateGrid(float[,] map, float squareSize)
+    public void GenerateGrid(MapNodes[,] map, float squareSize, float fillPercent)
     {
-        grid = new SquareGrid(map, squareSize);
+        this.fillPercent = fillPercent;
+        grid = new SquareGrid(map, squareSize, fillPercent);
 
     }
 
@@ -116,6 +121,233 @@ public class MeshGenerator : MonoBehaviour
     }
 
     /// <summary>
+    /// Determines what the triangles are going to look like 
+    /// based off of which Nodes are active
+    /// </summary>
+    /// <param name="square"></param>
+    void InterpolationTriangulateSquare(Square square)
+    {
+        float t1, t2;
+
+        switch (square.configuration)
+        {
+            case 0:
+                break;
+            case 1:
+                t1 = GetT(square.topLeft, square.bottomLeft, fillPercent);
+                t2 = GetT(square.bottomLeft, square.bottomRight, fillPercent);
+
+                square.centerLeft = new Node(Vector3.Lerp(square.topLeft.pos, square.bottomLeft.pos, t1));
+                square.centerBotton = new Node(Vector3.Lerp(square.bottomLeft.pos, square.bottomRight.pos, t2));
+
+                //square.centerLeft = GetInterpolatedNode(square.topLeft, square.bottomLeft, t1);
+                //square.centerBotton = GetInterpolatedNode(square.bottomLeft, square.bottomRight, t2);
+
+                MeshFromPoints(square.centerBotton, square.bottomLeft, square.centerLeft);
+                break;
+            case 2:
+                t1 = GetT(square.topRight, square.bottomRight, fillPercent);
+                t2 = GetT(square.bottomLeft, square.bottomRight, fillPercent);
+
+                square.centerRight = new Node(Vector3.Lerp(square.topRight.pos, square.bottomRight.pos, t1));
+                square.centerBotton = new Node(Vector3.Lerp(square.bottomLeft.pos, square.bottomRight.pos, t2));
+
+                //square.centerRight = GetInterpolatedNode(square.topRight, square.bottomRight, t1);
+                //square.centerBotton = GetInterpolatedNode(square.bottomLeft, square.bottomRight, t2);
+
+                MeshFromPoints(square.centerRight, square.bottomRight, square.centerBotton);
+                break;
+            case 3:
+                t1 = GetT(square.topLeft, square.bottomLeft, fillPercent);
+                t2 = GetT(square.topRight, square.bottomRight, fillPercent);
+
+                square.centerLeft = new Node(Vector3.Lerp(square.topLeft.pos, square.bottomLeft.pos, t1));
+                square.centerRight = new Node(Vector3.Lerp(square.topRight.pos, square.bottomRight.pos, t2));
+
+                //square.centerLeft = GetInterpolatedNode(square.topLeft, square.bottomLeft, t1);
+                //square.centerRight = GetInterpolatedNode(square.topRight, square.bottomRight, t2);
+
+                MeshFromPoints(square.centerRight, square.bottomRight, square.bottomLeft, square.centerLeft);
+
+                break;
+            case 4:
+                t1 = GetT(square.topLeft, square.topRight, fillPercent);
+                t2 = GetT(square.topRight, square.bottomRight, fillPercent);
+
+                square.centerTop = new Node(Vector3.Lerp(square.topLeft.pos, square.topRight.pos, t1));
+                square.centerRight = new Node(Vector3.Lerp(square.topRight.pos, square.bottomRight.pos, t2));
+
+                //square.centerTop = GetInterpolatedNode(square.topLeft, square.topRight, t1);
+                //square.centerRight = GetInterpolatedNode(square.topRight, square.bottomRight, t2);
+
+                MeshFromPoints(square.centerTop, square.topRight, square.centerRight);
+
+                break;
+
+            case 5:
+                t1 = GetT(square.topLeft, square.topRight, fillPercent);
+                t2 = GetT(square.topLeft, square.bottomLeft, fillPercent);
+
+                square.centerTop = new Node(Vector3.Lerp(square.topLeft.pos, square.topRight.pos, t1));
+                square.centerLeft = new Node(Vector3.Lerp(square.topLeft.pos, square.bottomLeft.pos, t2));
+
+                //square.centerTop = GetInterpolatedNode(square.topLeft, square.topRight, t1);
+                //square.centerLeft = GetInterpolatedNode(square.topLeft, square.bottomLeft, t2);
+
+                t1 = GetT(square.bottomLeft, square.bottomRight, fillPercent);
+                t2 = GetT(square.topRight, square.bottomRight, fillPercent);
+
+                square.centerBotton = new Node(Vector3.Lerp(square.bottomLeft.pos, square.bottomRight.pos, t1));
+                square.centerRight = new Node(Vector3.Lerp(square.topRight.pos, square.bottomRight.pos, t2));
+
+                //square.centerBotton = GetInterpolatedNode(square.bottomLeft, square.bottomRight, t1);
+                //square.centerRight = GetInterpolatedNode(square.topRight, square.bottomRight, t2);
+
+                MeshFromPoints(square.centerTop, square.topRight, square.centerRight, square.centerBotton, square.bottomLeft, square.centerLeft);
+
+                break;
+
+            case 6:
+                t1 = GetT(square.topLeft, square.topRight, fillPercent);
+                t2 = GetT(square.bottomLeft, square.bottomRight, fillPercent);
+
+                square.centerTop = new Node(Vector3.Lerp(square.topLeft.pos, square.topRight.pos, t1));
+                square.centerBotton = new Node(Vector3.Lerp(square.bottomLeft.pos, square.bottomRight.pos, t2));
+
+                //square.centerTop = GetInterpolatedNode(square.topLeft, square.topRight, t1);
+                //square.centerBotton = GetInterpolatedNode(square.bottomLeft, square.bottomRight, t2);
+
+                MeshFromPoints(square.centerTop, square.topRight, square.bottomRight, square.centerBotton);
+
+                break;
+
+            case 7:
+                t1 = GetT(square.topLeft, square.topRight, fillPercent);
+                t2 = GetT(square.topLeft, square.bottomLeft, fillPercent);
+
+                square.centerTop = new Node(Vector3.Lerp(square.topLeft.pos, square.topRight.pos, t1));
+                square.centerLeft = new Node(Vector3.Lerp(square.topLeft.pos, square.bottomLeft.pos, t2));
+
+                //square.centerTop = GetInterpolatedNode(square.topLeft, square.topRight, t1);
+                //square.centerLeft = GetInterpolatedNode(square.topLeft, square.bottomLeft, t2);
+
+                MeshFromPoints(square.centerTop, square.topRight, square.bottomRight, square.bottomLeft, square.centerLeft);
+
+                break;
+
+            case 8:
+                t1 = GetT(square.topLeft, square.topRight, fillPercent);
+                t2 = GetT(square.topLeft, square.bottomLeft, fillPercent);
+
+                square.centerTop = new Node(Vector3.Lerp(square.topLeft.pos, square.topRight.pos, t1));
+                square.centerLeft = new Node(Vector3.Lerp(square.topLeft.pos, square.bottomLeft.pos, t2));
+
+                //square.centerTop = GetInterpolatedNode(square.topLeft, square.topRight, t1);
+                //square.centerLeft = GetInterpolatedNode(square.topLeft, square.bottomLeft, t2);
+
+                MeshFromPoints(square.topLeft, square.centerTop, square.centerLeft);
+
+                break;
+            case 9:
+                t1 = GetT(square.topLeft, square.topRight, fillPercent);
+                t2 = GetT(square.bottomLeft, square.bottomRight, fillPercent);
+
+                square.centerTop = new Node(Vector3.Lerp(square.topLeft.pos, square.topRight.pos, t1));
+                square.centerBotton = new Node(Vector3.Lerp(square.bottomLeft.pos, square.bottomRight.pos, t2));
+
+                //square.centerTop = GetInterpolatedNode(square.topLeft, square.topRight, t1);
+                //square.centerBotton = GetInterpolatedNode(square.bottomLeft, square.bottomRight, t2);
+
+                MeshFromPoints(square.topLeft, square.centerTop, square.centerBotton, square.bottomLeft);
+
+                break;
+            case 10:
+                t1 = GetT(square.topLeft, square.topRight, fillPercent);
+                t2 = GetT(square.topLeft, square.bottomLeft, fillPercent);
+
+                square.centerTop = new Node(Vector3.Lerp(square.topLeft.pos, square.topRight.pos, t1));
+                square.centerLeft = new Node(Vector3.Lerp(square.topLeft.pos, square.bottomLeft.pos, t2));
+
+                //square.centerTop = GetInterpolatedNode(square.topLeft, square.topRight, t1);
+                //square.centerLeft = GetInterpolatedNode(square.topLeft, square.bottomLeft, t2);
+
+                t1 = GetT(square.bottomLeft, square.bottomRight, fillPercent);
+                t2 = GetT(square.topRight, square.bottomRight, fillPercent);
+
+                square.centerBotton = new Node(Vector3.Lerp(square.bottomLeft.pos, square.bottomRight.pos, t1));
+                square.centerRight = new Node(Vector3.Lerp(square.topRight.pos, square.bottomRight.pos, t2));
+
+                //square.centerBotton = GetInterpolatedNode(square.bottomLeft, square.bottomRight, t1);
+                //square.centerRight = GetInterpolatedNode(square.topRight, square.bottomRight, t2);
+
+                MeshFromPoints(square.topLeft, square.centerTop, square.centerRight, square.bottomRight, square.centerBotton, square.centerLeft);
+
+                break;
+            case 11:
+                t1 = GetT(square.topLeft, square.topRight, fillPercent);
+                t2 = GetT(square.topRight, square.bottomRight, fillPercent);
+
+                square.centerTop = new Node(Vector3.Lerp(square.topLeft.pos, square.topRight.pos, t1));
+                square.centerRight = new Node(Vector3.Lerp(square.topRight.pos, square.bottomRight.pos, t2));
+
+                //square.centerTop = GetInterpolatedNode(square.topLeft, square.topRight, t1);
+                //square.centerRight = GetInterpolatedNode(square.topRight, square.bottomRight, t2);
+
+                MeshFromPoints(square.topLeft, square.centerTop, square.centerRight, square.bottomRight, square.bottomLeft);
+
+                break;
+            case 12:
+                t1 = GetT(square.topLeft, square.bottomLeft, fillPercent);
+                t2 = GetT(square.topRight, square.bottomRight, fillPercent);
+
+                square.centerLeft = new Node(Vector3.Lerp(square.topLeft.pos, square.bottomLeft.pos, t1));
+                square.centerRight = new Node(Vector3.Lerp(square.topRight.pos, square.bottomRight.pos, t2));
+
+                //square.centerLeft = GetInterpolatedNode(square.topLeft, square.bottomLeft, t1);
+                //square.centerRight = GetInterpolatedNode(square.topRight, square.bottomRight, t2);
+
+                MeshFromPoints(square.topLeft, square.topRight, square.centerRight, square.centerLeft);
+
+                break;
+            case 13:
+                t1 = GetT(square.topRight, square.bottomRight, fillPercent);
+                t2 = GetT(square.bottomLeft, square.bottomRight, fillPercent);
+
+                square.centerRight = new Node(Vector3.Lerp(square.topRight.pos, square.bottomRight.pos, t1));
+                square.centerBotton = new Node(Vector3.Lerp(square.bottomLeft.pos, square.bottomRight.pos, t2));
+
+                //square.centerRight = GetInterpolatedNode(square.topRight, square.bottomRight, t1);
+                //square.centerBotton = GetInterpolatedNode(square.bottomLeft, square.bottomRight, t2);
+
+                MeshFromPoints(square.topLeft, square.topRight, square.centerRight, square.centerBotton, square.bottomLeft);
+
+                break;
+            case 14:
+                t1 = GetT(square.topLeft, square.bottomLeft, fillPercent);
+                t2 = GetT(square.bottomLeft, square.bottomRight, fillPercent);
+
+                square.centerLeft = new Node(Vector3.Lerp(square.topLeft.pos, square.bottomLeft.pos, t1));
+                square.centerBotton = new Node(Vector3.Lerp(square.bottomLeft.pos, square.bottomRight.pos, t2));
+
+                //square.centerLeft = GetInterpolatedNode(square.topLeft, square.bottomLeft, t1);
+                //square.centerBotton = GetInterpolatedNode(square.bottomLeft, square.bottomRight, t2);
+
+                MeshFromPoints(square.topLeft, square.topRight, square.bottomRight, square.centerBotton, square.centerLeft);
+
+                break;
+
+            case 15:
+                MeshFromPoints(square.topLeft, square.topRight, square.bottomRight, square.bottomLeft);
+
+                break;
+
+            default:
+                break;
+        }
+
+    }
+
+    /// <summary>
     /// Depending on how many points are in the "points" it creates a triangle for each one
     /// </summary>
     /// <param name="points"></param>
@@ -139,6 +371,23 @@ public class MeshGenerator : MonoBehaviour
         {
             CreateTriangle(points[0], points[4], points[5]);
         }
+    }
+
+    public float GetT(Node a, Node b, float value)
+    {
+        float v2 = Mathf.Max(b.v, a.v);
+        float v1 = Mathf.Min(b.v, a.v);
+
+        //return (value - a.v) / (a.v - b.v);
+        return (a.v + b.v) / 2f;
+    }
+
+    public Node GetInterpolatedNode(Node a, Node b, float t)
+    {
+        float x = (1 - t) * a.pos.x + t * b.pos.x;
+        float z = (1 - t) * a.pos.z + t * b.pos.z;
+
+        return new Node(new Vector3(x, a.pos.y, z));
     }
 
     /// <summary>
@@ -186,7 +435,7 @@ public class SquareGrid
     /// </summary>
     /// <param name="map">The map from the LevelGenerator class</param>
     /// <param name="squareSize"></param>
-    public SquareGrid(float[,] map, float squareSize)
+    public SquareGrid(MapNodes[,] map, float squareSize, float fillPercent)
     {
         int nodeCountX = map.GetLength(0);
         int nodeCountY = map.GetLength(1);
@@ -203,7 +452,7 @@ public class SquareGrid
                 Vector3 pos = new Vector3(-mapWidth / 2 + x * squareSize + squareSize / 2, 0, -mapHeight / 2 + y * squareSize + squareSize / 2);
 
                 // Adds it to the new list of nodes
-                nodes[x, y] = new Node(pos, map[x, y] == 1, squareSize);
+                nodes[x, y] = new Node(pos, map[x, y].active == 1, squareSize, map[x, y].value);
             }
         }
 
@@ -214,7 +463,7 @@ public class SquareGrid
             for (int y = 0; y < nodeCountY - 1; y++)
             {
                 // Adds a new square for each square in the original map
-                squares[x, y] = new Square(nodes[x, y + 1], nodes[x + 1, y + 1], nodes[x + 1, y], nodes[x, y]);
+                squares[x, y] = new Square(nodes[x, y + 1], nodes[x + 1, y + 1], nodes[x + 1, y], nodes[x, y], fillPercent);
             }
         }
 
@@ -247,12 +496,19 @@ public class Square
     /// <param name="_topRight"></param>
     /// <param name="_bottomRight"></param>
     /// <param name="_bottomLeft"></param>
-    public Square(Node _topLeft, Node _topRight, Node _bottomRight, Node _bottomLeft)
+    public Square(Node _topLeft, Node _topRight, Node _bottomRight, Node _bottomLeft, float _fillPercent)
     {
         topLeft = _topLeft;
         topRight = _topRight;
         bottomRight = _bottomRight;
         bottomLeft = _bottomLeft;
+
+        // TODO: add in linear interpolation using the fillpercent, the value, and points
+
+        //centerTop = GetInterpolatedNode(topLeft, topRight, GetT(topLeft, topRight, _fillPercent));
+        //centerRight = GetInterpolatedNode(topRight, bottomRight, GetT(topRight, bottomRight, _fillPercent));
+        //centerBotton = GetInterpolatedNode(bottomRight, bottomLeft, GetT(bottomRight, bottomLeft, _fillPercent));
+        //centerLeft = GetInterpolatedNode(topLeft, bottomLeft, GetT(topLeft, bottomLeft, _fillPercent));
 
         centerTop = topLeft.right;
         centerRight = bottomRight.above;
@@ -278,6 +534,8 @@ public class Square
 
     }
 
+    
+
 }
 
 /// <summary>
@@ -290,13 +548,15 @@ public class Node
     public bool active;
     public Node above;
     public Node right;
+    public float v;
 
-    public Node(Vector3 position, bool act, float squareSize)
+    public Node(Vector3 position, bool act, float squareSize, float val = 0)
     {
         active = act;
         above = new Node(position + Vector3.forward * squareSize / 2);
         right = new Node(position + Vector3.right * squareSize / 2);
         pos = position;
+        v = val;
     }
 
     public Node(Vector3 position)

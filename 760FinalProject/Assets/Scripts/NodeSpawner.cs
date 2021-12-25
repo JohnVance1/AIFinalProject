@@ -110,7 +110,7 @@ public class NodeSpawner : MonoBehaviour
             {
                 foreach (AINode tile in wallRegion)
                 {
-                    level.map[tile.tileX, tile.tileY] = 0;
+                    level.map[tile.tileX, tile.tileY].active = 0;
                 }
             }
         }
@@ -126,7 +126,7 @@ public class NodeSpawner : MonoBehaviour
             {
                 foreach (AINode tile in roomRegion)
                 {
-                    level.map[tile.tileX, tile.tileY] = 1;
+                    level.map[tile.tileX, tile.tileY].active = 1;
                 }
             }
         }
@@ -151,7 +151,7 @@ public class NodeSpawner : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                if (mapFlags[x, y] == 0 && level.map[x, y] == tileType)
+                if (mapFlags[x, y] == 0 && level.map[x, y].active == tileType)
                 {
                     List<AINode> newRegion = GetRegionTiles(x, y);
                     regions.Add(newRegion);
@@ -181,7 +181,7 @@ public class NodeSpawner : MonoBehaviour
 
         List<AINode> tiles = new List<AINode>();
         int[,] mapFlags = new int[width, height];
-        int tileType = (int)level.map[startX, startY];
+        int tileType = (int)level.map[startX, startY].active;
 
         Queue<AINode> queue = new Queue<AINode>();
         queue.Enqueue(new AINode(level.meshGen.grid.nodes[startX, startY].pos, startX, startY));
@@ -198,7 +198,7 @@ public class NodeSpawner : MonoBehaviour
                 {
                     if (IsInMapRange(x, y) && (y == (int)tile.tileY || x == (int)tile.tileX))
                     {
-                        if (mapFlags[x, y] == 0 && level.map[x, y] == tileType)
+                        if (mapFlags[x, y] == 0 && level.map[x, y].active == tileType)
                         {
                             mapFlags[x, y] = 1;
                             queue.Enqueue(new AINode(level.meshGen.grid.nodes[x, y].pos, x, y));
