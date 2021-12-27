@@ -51,7 +51,7 @@ public class NodeSpawner : MonoBehaviour
         List<AINode> highestList = new List<AINode>();
         List<AINode> lowestList = new List<AINode>();
 
-        AINode[,] largestMap = new AINode[level.width, level.height];
+        AINode[,] largestMap = new AINode[level.width * level.resolution, level.height * level.resolution];
 
         float highest = -1000f;
         float lowest = 1000f;
@@ -142,8 +142,8 @@ public class NodeSpawner : MonoBehaviour
     List<List<AINode>> GetRegions(int tileType)
     {
         List<List<AINode>> regions = new List<List<AINode>>();
-        int width = level.width;
-        int height = level.height;
+        int width = level.width * level.resolution;
+        int height = level.height * level.resolution;
 
         int[,] mapFlags = new int[width, height];
 
@@ -176,8 +176,8 @@ public class NodeSpawner : MonoBehaviour
     /// <returns></returns>
     List<AINode> GetRegionTiles(int startX, int startY)
     {
-        int width = level.width;
-        int height = level.height;
+        int width = level.width * level.resolution;
+        int height = level.height * level.resolution;
 
         List<AINode> tiles = new List<AINode>();
         int[,] mapFlags = new int[width, height];
@@ -221,7 +221,7 @@ public class NodeSpawner : MonoBehaviour
     /// <returns></returns>
     bool IsInMapRange(int x, int y)
     {
-        return x >= 0 && x < level.width && y >= 0 && y < level.height;
+        return x >= 0 && x < level.width * level.resolution && y >= 0 && y < level.height * level.resolution;
     }
 
 

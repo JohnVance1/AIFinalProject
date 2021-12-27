@@ -41,11 +41,11 @@ public class PathFinding : SerializedMonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
-        foreach(AINode node in path)
-        {
-            Gizmos.DrawCube(node.pos, Vector3.one * 0.8f);
-        }
+        //Gizmos.color = Color.green;
+        //foreach(AINode node in path)
+        //{
+        //    Gizmos.DrawCube(node.pos, Vector3.one * 0.5f);
+        //}
     }
 
     /// <summary>
@@ -162,7 +162,7 @@ public class PathFinding : SerializedMonoBehaviour
 
         foreach(AINode node in path)
         {
-            gOPath.Add(Instantiate(pathPrefab, node.pos, Quaternion.identity));
+            //gOPath.Add(Instantiate(pathPrefab, node.pos, Quaternion.identity));
         }
 
     }

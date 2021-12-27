@@ -209,7 +209,7 @@ MonoBehaviour:
   fillPercent: 48
   meshGen: {fileID: 0}
   squareSize: 1
-  resolution: 1
+  resolution: 6
   randomFill: 1
   perlinNoise: 0
   fractalBrownianNoise: 0
@@ -240,7 +240,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8826c97784fdb9c47a9da2bcc3e96e36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: grid
+      Entry: 6
+      Data: 
   fillPercent: 0
+  interpolation: 0
 --- !u!23 &206888494
 MeshRenderer:
   m_ObjectHideFlags: 0

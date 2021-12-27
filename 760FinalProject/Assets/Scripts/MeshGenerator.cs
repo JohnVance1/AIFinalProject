@@ -1,15 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 
-public class MeshGenerator : MonoBehaviour
+public class MeshGenerator : SerializedMonoBehaviour
 {
     Mesh mesh;
     public SquareGrid grid;
     private List<Vector3> vertices;
     private List<int> triangles;
     public float fillPercent;
-    
+
+    private Square[,] squareList;
+
+    [SerializeField]
+    private bool interpolation;
+
     /// <summary>
     /// Takes in the map from the LevelGenerator and 
     /// creates a mesh of triangles based on the active points
@@ -20,8 +27,9 @@ public class MeshGenerator : MonoBehaviour
     {
         this.fillPercent = fillPercent;
         grid = new SquareGrid(map, squareSize, fillPercent);
+        squareList = grid.ReturnList();
 
-        
+
         vertices = new List<Vector3>();
         triangles = new List<int>();
         if (grid.squares != null)
@@ -30,12 +38,18 @@ public class MeshGenerator : MonoBehaviour
             {
                 for (int y = 0; y < grid.squares.GetLength(1); y++)
                 {
-                    InterpolationTriangulateSquare(grid.squares[x, y]);
-                    //TriangulateSquare(grid.squares[x, y]);
+                    if (interpolation)
+                    {
+                        InterpolationTriangulateSquare(grid.squares[x, y]);
+                    }
+                    else
+                    {
+                        TriangulateSquare(grid.squares[x, y]);
+                    }
                 }
             }
         }
-        
+
 
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
@@ -43,6 +57,37 @@ public class MeshGenerator : MonoBehaviour
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.RecalculateNormals();
+    }
+
+    void OnDrawGizmos()
+    {
+        //if (grid != null)
+        //{
+        //    for (int x = 0; x < grid.squares.GetLength(0); x++)
+        //    {
+        //        for (int y = 0; y < grid.squares.GetLength(1); y++)
+        //        {
+        //            Gizmos.color = (grid.squares[x, y].topLeft.active) ? Color.black : Color.white;
+        //            Gizmos.DrawCube(grid.squares[x, y].topLeft.pos, Vector3.one * 0.05f);
+
+        //            Gizmos.color = (grid.squares[x, y].topRight.active) ? Color.black : Color.white;
+        //            Gizmos.DrawCube(grid.squares[x, y].topRight.pos, Vector3.one * 0.05f);
+
+        //            Gizmos.color = (grid.squares[x, y].bottomRight.active) ? Color.black : Color.white;
+        //            Gizmos.DrawCube(grid.squares[x, y].bottomRight.pos, Vector3.one * 0.05f);
+
+        //            Gizmos.color = (grid.squares[x, y].bottomLeft.active) ? Color.black : Color.white;
+        //            Gizmos.DrawCube(grid.squares[x, y].bottomLeft.pos, Vector3.one * 0.05f);
+
+        //            Gizmos.color = Color.gray;
+        //            Gizmos.DrawCube(grid.squares[x, y].centerTop.pos, Vector3.one * 0.01f);
+        //            Gizmos.DrawCube(grid.squares[x, y].centerRight.pos, Vector3.one * 0.01f);
+        //            Gizmos.DrawCube(grid.squares[x, y].centerBotton.pos, Vector3.one * 0.01f);
+        //            Gizmos.DrawCube(grid.squares[x, y].centerLeft.pos, Vector3.one * 0.01f);
+
+        //        }
+        //    }
+        //}
     }
 
     public void GenerateGrid(MapNodes[,] map, float squareSize, float fillPercent)
@@ -127,7 +172,8 @@ public class MeshGenerator : MonoBehaviour
     /// <param name="square"></param>
     void InterpolationTriangulateSquare(Square square)
     {
-        float t1, t2;
+        float t1;
+        float t2;
 
         switch (square.configuration)
         {
@@ -380,6 +426,7 @@ public class MeshGenerator : MonoBehaviour
 
         //return (value - a.v) / (a.v - b.v);
         return (a.v + b.v) / 2f;
+        //return 0.5f;
     }
 
     public Node GetInterpolatedNode(Node a, Node b, float t)
@@ -467,6 +514,12 @@ public class SquareGrid
             }
         }
 
+
+    }
+
+    public Square[,] ReturnList()
+    {
+        return squares;
     }
 
 }

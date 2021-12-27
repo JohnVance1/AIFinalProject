@@ -41,7 +41,7 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField]
     private float squareSize;
     [SerializeField] [Range(1, 10)]
-    private int resolution;
+    public int resolution;
 
     [Header("Generation Method")]
     [SerializeField] private bool randomFill;
@@ -123,6 +123,22 @@ public class LevelGenerator : MonoBehaviour
         //}
         #endregion
 
+    }
+
+    void OnDrawGizmos()
+    {
+        //if (map != null)
+        //{
+        //    for (int x = 0; x < width; x++)
+        //    {
+        //        for (int y = 0; y < height; y++)
+        //        {
+        //            Gizmos.color = (map[x, y].active == 1) ? Color.black : Color.white;
+        //            Vector3 pos = new Vector3(-width * squareSize / 2 + x * squareSize + squareSize / 2, 0, -height * squareSize / 2 + y * squareSize + squareSize / 2);
+        //            Gizmos.DrawCube(pos, Vector3.one * squareSize);
+        //        }
+        //    }
+        //}
     }
 
     void OnEnable()
