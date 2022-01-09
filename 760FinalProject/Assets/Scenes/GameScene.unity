@@ -205,11 +205,11 @@ MonoBehaviour:
   width: 60
   height: 60
   seed: 231
-  randomSeed: 1
+  randomSeed: 0
   fillPercent: 48
   meshGen: {fileID: 0}
   squareSize: 1
-  resolution: 6
+  resolution: 1
   randomFill: 1
   perlinNoise: 0
   fractalBrownianNoise: 0

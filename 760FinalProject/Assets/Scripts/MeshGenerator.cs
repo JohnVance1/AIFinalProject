@@ -61,33 +61,112 @@ public class MeshGenerator : SerializedMonoBehaviour
 
     void OnDrawGizmos()
     {
-        //if (grid != null)
-        //{
-        //    for (int x = 0; x < grid.squares.GetLength(0); x++)
-        //    {
-        //        for (int y = 0; y < grid.squares.GetLength(1); y++)
-        //        {
-        //            Gizmos.color = (grid.squares[x, y].topLeft.active) ? Color.black : Color.white;
-        //            Gizmos.DrawCube(grid.squares[x, y].topLeft.pos, Vector3.one * 0.05f);
+        if (grid != null)
+        {
+            for (int x = 0; x < grid.squares.GetLength(0); x++)
+            {
+                for (int y = 0; y < grid.squares.GetLength(1); y++)
+                {
+                    Vector3 squarePos = new Vector3(grid.squares[x, y].centerRight.pos.x - 0.5f, grid.squares[x, y].centerRight.pos.y, grid.squares[x, y].centerRight.pos.z);
 
-        //            Gizmos.color = (grid.squares[x, y].topRight.active) ? Color.black : Color.white;
-        //            Gizmos.DrawCube(grid.squares[x, y].topRight.pos, Vector3.one * 0.05f);
 
-        //            Gizmos.color = (grid.squares[x, y].bottomRight.active) ? Color.black : Color.white;
-        //            Gizmos.DrawCube(grid.squares[x, y].bottomRight.pos, Vector3.one * 0.05f);
+                    switch (grid.squares[x, y].configuration)
+                    {
+                        case 0:
+                            Gizmos.color = Color.red;
+                            break;
+                        case 1:
+                            Gizmos.color = Color.yellow;
 
-        //            Gizmos.color = (grid.squares[x, y].bottomLeft.active) ? Color.black : Color.white;
-        //            Gizmos.DrawCube(grid.squares[x, y].bottomLeft.pos, Vector3.one * 0.05f);
+                            break;
+                        case 2:
+                            Gizmos.color = Color.green;
 
-        //            Gizmos.color = Color.gray;
-        //            Gizmos.DrawCube(grid.squares[x, y].centerTop.pos, Vector3.one * 0.01f);
-        //            Gizmos.DrawCube(grid.squares[x, y].centerRight.pos, Vector3.one * 0.01f);
-        //            Gizmos.DrawCube(grid.squares[x, y].centerBotton.pos, Vector3.one * 0.01f);
-        //            Gizmos.DrawCube(grid.squares[x, y].centerLeft.pos, Vector3.one * 0.01f);
+                            break;
+                        case 3:
+                            Gizmos.color = Color.cyan;
 
-        //        }
-        //    }
-        //}
+                            break;
+                        case 4:
+                            Gizmos.color = Color.blue;
+
+                            break;
+                        case 5:
+                            Gizmos.color = Color.magenta;
+
+                            break;
+                        case 6:
+                            Gizmos.color = Color.grey;
+
+                            break;
+                        case 7:
+                            Gizmos.color = Color.black;
+
+                            break;
+                        case 8:
+                            Gizmos.color = Color.white;
+
+                            break;
+                        case 9:
+                            Gizmos.color = new Color(1, 0.5f, 0.5f, 1);
+
+                            break;
+                        case 10:
+                            Gizmos.color = new Color(0.3f, 0.1f, 0.9f, 1);
+
+                            break;
+                        case 11:
+                            Gizmos.color = new Color(.7f, 0.5f, 0.1f, 1);
+
+                            break;
+                        case 12:
+                            Gizmos.color = new Color(1, 1, 0, 1);
+
+                            break;
+                        case 13:
+                            Gizmos.color = new Color(0.3f, 0.1f, 0.7f, 1);
+
+                            break;
+                        case 14:
+                            Gizmos.color = new Color(0.6f, 1, 0, 1);
+
+                            break;
+                        case 15:
+                            Gizmos.color = new Color(0.1f, 0.3f, 0.8f, 1);
+
+                            break;
+
+
+                    }
+                    //Gizmos.DrawCube(squarePos, Vector3.one * 0.7f);
+
+
+
+
+
+
+
+                    //Gizmos.color = (grid.squares[x, y].topLeft.active) ? Color.black : Color.white;
+                    //Gizmos.DrawCube(grid.squares[x, y].topLeft.pos, Vector3.one * 0.05f);
+
+                    //Gizmos.color = (grid.squares[x, y].topRight.active) ? Color.black : Color.white;
+                    //Gizmos.DrawCube(grid.squares[x, y].topRight.pos, Vector3.one * 0.05f);
+
+                    //Gizmos.color = (grid.squares[x, y].bottomRight.active) ? Color.black : Color.white;
+                    //Gizmos.DrawCube(grid.squares[x, y].bottomRight.pos, Vector3.one * 0.05f);
+
+                    //Gizmos.color = (grid.squares[x, y].bottomLeft.active) ? Color.black : Color.white;
+                    //Gizmos.DrawCube(grid.squares[x, y].bottomLeft.pos, Vector3.one * 0.05f);
+
+                    //Gizmos.color = Color.gray;
+                    //Gizmos.DrawCube(grid.squares[x, y].centerTop.pos, Vector3.one * 0.01f);
+                    //Gizmos.DrawCube(grid.squares[x, y].centerRight.pos, Vector3.one * 0.01f);
+                    //Gizmos.DrawCube(grid.squares[x, y].centerBotton.pos, Vector3.one * 0.01f);
+                    //Gizmos.DrawCube(grid.squares[x, y].centerLeft.pos, Vector3.one * 0.01f);
+
+                }
+            }
+        }
     }
 
     public void GenerateGrid(MapNodes[,] map, float squareSize, float fillPercent)
@@ -469,6 +548,7 @@ public class MeshGenerator : SerializedMonoBehaviour
     
 }
 
+
 /// <summary>
 /// Populates the new grid with Nodes for each side and corner of every square
 /// </summary>
@@ -514,7 +594,13 @@ public class SquareGrid
             }
         }
 
-
+        for (int x = 0; x < nodeCountX - 1; x++)
+        {
+            for (int y = 0; y < nodeCountY - 1; y++)
+            {
+                map[x, y].config = squares[x, y].configuration;
+            }
+        }
     }
 
     public Square[,] ReturnList()

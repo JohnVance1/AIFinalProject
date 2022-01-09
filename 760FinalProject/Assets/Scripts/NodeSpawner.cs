@@ -33,13 +33,30 @@ public class NodeSpawner : MonoBehaviour
                 largest = element;
             }
             
-            //DisplayAllRegions(element);
 
         }
         //Clear();
         Color c = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+        //DisplayAllRegions(largest);
 
         GetPoints(largest);
+    }
+
+    public void DisplayAllRegions(List<AINode> element)
+    {
+        //Color newColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+        Color newColor = Color.red;
+        foreach (AINode node in element)
+        {
+            if (level.meshGen.grid.squares[node.tileX, node.tileY].configuration == 0)
+            {
+                Vector3 pos = new Vector3(-level.map.GetLength(0) / 2 + node.tileX * 1 + 1 / 2, 0, -level.map.GetLength(0) / 2 + node.tileY * 1 + 1 / 2);
+
+                GameObject gO = Instantiate(cubePrefab, node.pos, Quaternion.identity);
+                gO.GetComponent<MeshRenderer>().material.color = newColor;
+                objects.Add(gO);
+            }
+        }
     }
 
     /// <summary>
@@ -86,7 +103,7 @@ public class NodeSpawner : MonoBehaviour
 
         if (highestList.Count != 0 && lowestList.Count != 0)
         {
-            path.AStar(highestList[0], lowestList[0], largestMap);
+            //path.AStar(highestList[0], lowestList[0], largestMap);
 
         }
         else
@@ -96,12 +113,16 @@ public class NodeSpawner : MonoBehaviour
         }
     }
 
+
     /// <summary>
     /// Processes the entire map and gets the areas
     /// </summary>
     public void ProcessMap()
     {
-        List<List<AINode>> wallRegions = GetRegions(1);
+        List<int> defaultConfig = new List<int>(){ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+        List<int> bottomConfig = new List<int>() { 1, 2, 3, 7, 11 };
+
+        List<List<AINode>> wallRegions = GetRegions(defaultConfig, 1);
         int wallThresholdSize = 50;
 
         foreach (List<AINode> wallRegion in wallRegions)
@@ -115,7 +136,7 @@ public class NodeSpawner : MonoBehaviour
             }
         }
 
-        List<List<AINode>> roomRegions = GetRegions(0);
+        List<List<AINode>> roomRegions = GetRegions(defaultConfig, 0);
         nodes = roomRegions;
 
         int roomThresholdSize = 50;
@@ -139,7 +160,7 @@ public class NodeSpawner : MonoBehaviour
     /// </summary>
     /// <param name="tileType"></param>
     /// <returns></returns>
-    List<List<AINode>> GetRegions(int tileType)
+    List<List<AINode>> GetRegions(List<int> configurations, int tileType = 3)
     {
         List<List<AINode>> regions = new List<List<AINode>>();
         int width = level.width * level.resolution;
@@ -151,7 +172,7 @@ public class NodeSpawner : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                if (mapFlags[x, y] == 0 && level.map[x, y].active == tileType)
+                if (mapFlags[x, y] == 0 && CheckTileType(tileType, level.map[x, y]) && configurations.Contains(level.map[x, y].config))
                 {
                     List<AINode> newRegion = GetRegionTiles(x, y);
                     regions.Add(newRegion);
@@ -166,6 +187,22 @@ public class NodeSpawner : MonoBehaviour
         }
 
         return regions;
+    }
+
+
+    public bool CheckTileType(int tiletype, MapNodes current)
+    {
+        if(tiletype == 3)
+        {
+            return true;
+        }
+        else
+        {
+            return current.active == tiletype;
+        }
+
+
+
     }
 
     /// <summary>

@@ -8,6 +8,7 @@ public struct MapNodes
 {
     public int active;
     public float value;
+    public int config;
 
 }
 
